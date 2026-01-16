@@ -1,0 +1,71 @@
+#!/bin/bash
+
+name=gcc
+version=15.2.0
+tarball_url="https://ftp.gnu.org/gnu/gcc/gcc-${version}/gcc-${version}.tar.xz"
+tarball_blake2b="e270320978ca690e6e8f5ef06414dc13caf561f16403a3783c76fbf3dcee57e755a2d5bba922bf7fcae0bb6120443755d819b003791ae823d54589dd799804de"
+revision=1
+imagedeps="build-essential"
+hostdeps="gcc pkgconf"
+deps="core-libs binutils gettext gmp mpc mpfr zlib"
+
+prepare() {
+    for i in "${base_dir}"/patches/gcc-host/*; do
+        patch -p1 < "$i"
+    done
+}
+
+configure() {
+    autotools_configure \
+        CFLAGS_FOR_BUILD="${HOST_CFLAGS}" \
+        CXXFLAGS_FOR_BUILD="${HOST_CXXFLAGS}" \
+        LDFLAGS_FOR_BUILD="${HOST_LDFLAGS}" \
+        CFLAGS_FOR_TARGET="${TARGET_CFLAGS}" \
+        CXXFLAGS_FOR_TARGET="${TARGET_CXXFLAGS}" \
+        LDFLAGS_FOR_TARGET="${TARGET_LDFLAGS}" \
+        --target=${OS_TRIPLET} \
+        --with-sysroot=/ \
+        --with-build-sysroot=${sysroot_dir} \
+        --with-glibc-version=2.42 \
+        --enable-__cxa_atexit \
+        --enable-cet=auto \
+        --enable-checking=release \
+        --enable-clocale=gnu \
+        --with-linker-hash-style=gnu \
+        --enable-linker-build-id \
+        --enable-default-pie \
+        --enable-default-ssp \
+        --enable-gnu-indirect-function \
+        --enable-gnu-unique-object \
+        --enable-libstdcxx-backtrace \
+        --enable-link-serialization=1 \
+        --enable-linker-build-id \
+        --enable-languages=c,c++,lto \
+        --enable-lto \
+        --disable-multilib \
+        --enable-plugin \
+        --enable-shared \
+        --enable-host-shared \
+        --enable-threads=posix \
+        --disable-libssp \
+        --disable-libstdcxx-pch \
+        --disable-werror \
+        --with-system-zlib
+}
+
+build() {
+    make -j${parallelism} all-gcc
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install-gcc
+
+    ln -s gcc "${dest_dir}${prefix}"/bin/cc
+    cp -v "${base_dir}"/build-support/gcc/c89 "${dest_dir}${prefix}"/bin/
+    cp -v "${base_dir}"/build-support/gcc/c99 "${dest_dir}${prefix}"/bin/
+
+    # Remove static libraries
+    rm -rf "${dest_dir}${prefix}"/lib/*.a
+
+    post_package_strip
+}

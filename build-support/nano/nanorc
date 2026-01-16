@@ -1,0 +1,5 @@
+set historylog
+set nowrap
+set softwrap
+
+include /usr/share/nano/*.nanorc

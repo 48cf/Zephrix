@@ -1,0 +1,28 @@
+#!/bin/bash
+
+name=gettext
+version=0.26
+tarball_url="https://ftp.gnu.org/gnu/gettext/gettext-${version}.tar.xz"
+tarball_blake2b="b182e5fdb9fc46868dc39b512ef300c54c8e77a766f2d2de69289f84966d4205f494b3ecedfb30c6df581947172411ae7eb4ccc0bb1f180b67dd8a83803832a8"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    # Remove conflicting libintl files
+    rm -f "${dest_dir}${prefix}"/include/libintl.h
+    rm -f "${dest_dir}${prefix}"/lib/libintl.so*
+    rm -f "${dest_dir}${prefix}"/share/locale/locale.alias
+
+    post_package_strip
+}

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+name=bc
+version=1.08.2
+tarball_url="https://ftp.gnu.org/gnu/bc/bc-${version}.tar.gz"
+tarball_blake2b="6ff6d5083aa67d4075116c691b1f975127ab5079e1a1b63d916fbd3e6d5e95c7f4bc7fe196cac0e2a51a7f4c56d91da60495f3ce60f08bee8f2ba4278a791834"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs gmp mpfr readline"
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+
+        configure_script_path=./configure \
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" PREFIX="${prefix}" make install
+
+    post_package_strip
+}
