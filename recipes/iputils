@@ -1,0 +1,24 @@
+#!/bin/bash
+
+name=iputils
+version=20250605
+tarball_url="https://github.com/iputils/iputils/releases/download/${version}/iputils-${version}.tar.xz"
+tarball_blake2b="16a87130f215d9e1bf27a8559a70ed24065d411d18eef0bbfaf36118ac8b097abd8b965b4842efa00d2cab6a03e93c9f49eec020f308f7cb6d8995651b8b5380"
+revision=1
+imagedeps="build-essential"
+hostdeps="gcc pkgconf"
+deps="core-libs libcap libidn2"
+
+configure() {
+    meson_configure
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

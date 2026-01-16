@@ -1,0 +1,39 @@
+#!/bin/bash
+
+name=openssl
+version=3.6.0
+tarball_url="https://github.com/openssl/openssl/releases/download/openssl-${version}/openssl-${version}.tar.gz"
+tarball_blake2b="4a0150aa9a78581e74119b338848458249630c94a43589a5b311d41c669b817b043007ddd13b3fb81233da10af3ccd455f3fbf3b09cf45016c475a8e2044e965"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs zlib"
+
+configure() {
+        CC="${OS_TRIPLET}-gcc" \
+        CXX="${OS_TRIPLET}-g++" \
+        AR="${OS_TRIPLET}-ar" \
+        CFLAGS="${TARGET_CFLAGS}" \
+        CXXFLAGS="${TARGET_CXXFLAGS}" \
+        LDFLAGS="${TARGET_LDFLAGS}" \
+    "${source_dir}/Configure" \
+        --prefix="${prefix}" \
+        --openssldir=/etc/ssl \
+        --libdir=lib \
+        "linux-${JINX_ARCH}" \
+        shared \
+        zlib-dynamic \
+        no-afalgeng
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    # Disable installing static libraries.
+    sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
+
+    DESTDIR="${dest_dir}" make DESTDIR="${dest_dir}" MANSUFFIX=ssl install
+
+    post_package_strip
+}

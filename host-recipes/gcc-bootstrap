@@ -1,0 +1,58 @@
+#!/bin/bash
+
+name=gcc-bootstrap
+from_source=gcc-host
+revision=1
+imagedeps="build-essential"
+hostdeps="pkgconf"
+hostrundeps="binutils"
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+    mkdir -p build && cd build
+
+        CFLAGS="${HOST_CFLAGS}" \
+        CXXFLAGS="${HOST_CXXFLAGS}" \
+        LDFLAGS="${HOST_LDFLAGS}" \
+        CFLAGS_FOR_TARGET="${TARGET_CFLAGS}" \
+        CXXFLAGS_FOR_TARGET="${TARGET_CXXFLAGS}" \
+    ../configure \
+        --prefix="${prefix}" \
+        --target=${OS_TRIPLET} \
+        --with-sysroot="${sysroot_dir}" \
+        --with-glibc-version="$(. "${base_dir}/recipes/glibc" && echo "${version}")" \
+        --with-newlib \
+        --without-headers \
+        --enable-checking=release \
+        --enable-default-pie \
+        --enable-default-ssp \
+        --enable-gnu-indirect-function \
+        --enable-gnu-unique-object \
+        --enable-link-serialization=1 \
+        --enable-linker-build-id \
+        --enable-languages=c,c++,lto \
+        --enable-lto \
+        --disable-multilib \
+        --disable-libstdcxx-pch \
+        --disable-werror \
+        --disable-libatomic \
+        --disable-libgomp \
+        --disable-libquadmath \
+        --disable-libssp \
+        --disable-libstdcxx \
+        --disable-libvtv \
+        --disable-multilib \
+        --disable-nls \
+        --disable-shared \
+        --disable-threads
+}
+
+build() {
+    make -C build -j${parallelism} all-{gcc,target-libgcc}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make -C build install-{gcc,target-libgcc}
+
+    post_package_strip
+}

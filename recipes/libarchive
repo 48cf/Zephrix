@@ -1,0 +1,27 @@
+#!/bin/bash
+
+name=libarchive
+version=3.8.5
+tarball_url="https://github.com/libarchive/libarchive/releases/download/v${version}/libarchive-${version}.tar.gz"
+tarball_blake2b="fcf7b54d57d0fd7ae31955b99aa46192bdba81136cf54b7c85f9e058c1bc77c0d727b9cce71e57235afc7cc985c62e6a2bf9828476591c05fe5ae128c836a124"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs bzip2 libexpat libxml2 xz zlib zstd"
+
+configure() {
+    cmake_configure \
+        -DENABLE_TEST=OFF
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    # Remove static libraries
+    rm -v "${dest_dir}${prefix}/lib/libarchive.a"
+
+    post_package_strip
+}

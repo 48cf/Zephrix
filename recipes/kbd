@@ -1,0 +1,26 @@
+#!/bin/bash
+
+name=kbd
+version=2.9.0
+tarball_url="https://mirrors.edge.kernel.org/pub/linux/utils/kbd/kbd-${version}.tar.xz"
+tarball_blake2b="6f54dc139b7b20b5ac0f53129f67a9629c9bda22a09f7bd36dfa59500ac6fb87df18169872ca231645c1be6afb33fada97f096ef497f49547228dd01efa083f4"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs gzip pam"
+
+configure() {
+    autotools_configure \
+        --disable-werror \
+        --disable-tests \
+        --enable-optional-progs
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

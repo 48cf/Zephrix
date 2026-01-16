@@ -1,0 +1,136 @@
+#!/bin/bash
+
+JINX_MAJOR_VER=0.8
+JINX_DEBIAN_SNAPSHOT=20251202T083052Z
+JINX_BASE_PACKAGES="autopoint bison cmake docbook-xsl docbook-xml docbook-xsl-ns docbook5-xml doxygen file flex gettext groff m4 make meson ninja-build perl python3 texinfo w3m which xmlto xsltproc"
+
+HOST_CFLAGS="-O2 -pipe -fstack-clash-protection -Wp,-D_FORTIFY_SOURCE=3"
+HOST_CXXFLAGS="${HOST_CFLAGS} -Wp,-D_GLIBCXX_ASSERTIONS"
+HOST_LDFLAGS="-Wl,-O1 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now"
+
+TARGET_CFLAGS="${HOST_CFLAGS}"
+TARGET_CXXFLAGS="${HOST_CXXFLAGS}"
+TARGET_LDFLAGS="${HOST_LDFLAGS}"
+
+OS_TRIPLET="${JINX_ARCH}-jinx-linux-gnu"
+
+case "${JINX_ARCH}" in
+    x86_64)
+        TARGET_CFLAGS="${TARGET_CFLAGS} -march=x86-64 -mtune=generic -fcf-protection"
+        TARGET_CXXFLAGS="${TARGET_CXXFLAGS} -march=x86-64 -mtune=generic -fcf-protection"
+        TARGET_LDFLAGS="${TARGET_LDFLAGS} -Wl,-z,pack-relative-relocs"
+        ;;
+esac
+
+post_package_strip() {
+    local strip_command
+    if [ "${prefix}" = "/usr/local" ]; then
+        strip_command="strip"
+    else
+        strip_command="${OS_TRIPLET}-strip"
+    fi
+
+    for f in $(find "${dest_dir}${prefix}"/{bin,lib,libexec} 2>/dev/null); do
+        # Skip .o files - stripping relocatable objects removes relocation info
+        case "${f}" in
+            *.o) continue ;;
+        esac
+
+        if file "${f}" | grep -q 'not stripped'; then
+            echo "* stripping '${f}'..."
+            
+            local stripped_file="$(mktemp)"
+            ${strip_command} "${f}" -o "${stripped_file}"
+
+            chmod --reference="${f}" "${stripped_file}"
+            mv -f "${stripped_file}" "${f}"
+        fi
+    done
+}
+
+autotools_configure() {
+        CFLAGS="${TARGET_CFLAGS}" \
+        CXXFLAGS="${TARGET_CXXFLAGS}" \
+        LDFLAGS="${TARGET_LDFLAGS}" \
+    autotools_configure_noflags "$@"
+}
+
+autotools_configure_noflags() {
+    if [ -z "${configure_script_path}" ]; then
+        configure_script_path="${source_dir}/configure"
+    fi
+
+        ac_cv_func_malloc_0_nonnull=yes \
+        ac_cv_func_calloc_0_nonnull=yes \
+        ac_cv_func_realloc_0_nonnull=yes \
+    ${configure_script_path} \
+        --host=${OS_TRIPLET} \
+        --build="$(uname -m)-linux-gnu" \
+        --with-sysroot=${sysroot_dir} \
+        --prefix=${prefix} \
+        --sysconfdir=/etc \
+        --localstatedir=/var \
+        --bindir=${prefix}/bin \
+        --sbindir=${prefix}/bin \
+        --libdir=${prefix}/lib \
+        --disable-static \
+        --enable-shared \
+        --disable-malloc0returnsnull \
+        "$@"
+}
+
+meson_configure() {
+        CFLAGS="$TARGET_CFLAGS" \
+        CXXFLAGS="$TARGET_CXXFLAGS" \
+        LDFLAGS="$TARGET_LDFLAGS" \
+    meson_configure_noflags "$@"
+}
+
+meson_configure_noflags() {
+    if [ -z "${meson_source_dir}" ]; then
+        meson_source_dir="${source_dir}"
+    fi
+
+    meson setup "${meson_source_dir}" \
+        --cross-file "${base_dir}/build-support/cross_file-${JINX_ARCH}.txt" \
+        --prefix=${prefix} \
+        --sysconfdir=/etc \
+        --localstatedir=/var \
+        --bindir=bin \
+        --libdir=lib \
+        --sbindir=bin \
+        --buildtype=release \
+        --wrap-mode=nodownload \
+        -Ddefault_library=shared \
+        "$@"
+}
+
+cmake_configure() {
+        CFLAGS="$TARGET_CFLAGS" \
+        CXXFLAGS="$TARGET_CXXFLAGS" \
+        LDFLAGS="$TARGET_LDFLAGS" \
+    cmake_configure_noflags \
+        "$@"
+}
+
+cmake_configure_noflags() {
+    if [ -z "${cmake_source_dir}" ]; then
+        cmake_source_dir="${source_dir}"
+    fi
+
+    cmake "${cmake_source_dir}" \
+        -DCMAKE_TOOLCHAIN_FILE="${base_dir}/build-support/CMakeToolchain-${JINX_ARCH}.txt" \
+        -DCMAKE_INSTALL_PREFIX="${prefix}" \
+        -DCMAKE_INSTALL_SYSCONFDIR=/etc \
+        -DCMAKE_INSTALL_LOCALSTATEDIR=/var \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DCMAKE_INSTALL_SBINDIR=bin \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=ON \
+        -DBUILD_STATIC_LIBS=OFF \
+        -DENABLE_STATIC=OFF \
+        -DPKG_CONFIG_EXECUTABLE="/usr/local/bin/$OS_TRIPLET-pkg-config" \
+        -DCMAKE_COLOR_DIAGNOSTICS=ON \
+        -GNinja \
+        "$@"
+}

@@ -1,0 +1,47 @@
+#!/bin/bash
+
+name=linux
+version=6.18.5
+tarball_url="https://cdn.kernel.org/pub/linux/kernel/v${version%%.*}.x/linux-${version}.tar.xz"
+tarball_blake2b="9294ae977d7b8b929c476e649cbb116969a674d3923e5a4cddf8615ee5ba373761630f1a6397045d9ebe7eeaa87a3fffae3628aebc1ca4c7db5561b1c4513289"
+revision=1
+imagedeps="bc build-essential busybox cpio dracut dwarves kmod libelf-dev libncurses5-dev libssl-dev util-linux-extra"
+hostdeps="gcc"
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+    cp "${base_dir}"/build-support/linux/config ./.config
+
+    make \
+        CROSS_COMPILE="${OS_TRIPLET}-" \
+        olddefconfig
+}
+
+build() {
+    make -j${parallelism} \
+        CROSS_COMPILE="${OS_TRIPLET}-"
+}
+
+package() {
+    mkdir -pv "${dest_dir}${prefix}"/share/linux
+    cp -rpv arch/x86/boot/bzImage "${dest_dir}${prefix}"/share/linux/vmlinuz
+
+    make \
+        CROSS_COMPILE="${OS_TRIPLET}-" \
+        INSTALL_MOD_PATH="${dest_dir}${prefix}" \
+        INSTALL_MOD_STRIP=1 \
+        modules_install
+
+    dracut \
+        --verbose \
+        --tmpdir /tmp \
+        --kver "${version}" \
+        --kmoddir "${dest_dir}${prefix}/lib/modules/${version}" \
+        --strip \
+        --nomdadmconf \
+        --nolvmconf \
+        --no-hostonly \
+        --add busybox \
+        --omit systemd \
+        "${dest_dir}${prefix}"/share/linux/initramfs
+}

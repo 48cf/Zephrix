@@ -1,0 +1,43 @@
+#!/bin/bash
+
+name=libcap
+version=2.77
+tarball_url="https://mirrors.edge.kernel.org/pub/linux/libs/security/linux-privs/libcap2/libcap-${version}.tar.xz"
+tarball_blake2b="9725a5f886907f718a7149841003ac04aced8d322ae190b7035873dc823098c58311f15b9fe7e2a3fec683de6e2eeea108cd008f5f79e8dba24bb20595351812"
+revision=1
+imagedeps="build-essential"
+hostdeps="gcc pkgconf"
+deps="core-libs pam-bootstrap"
+
+_make() {
+    make $@ \
+        prefix="${prefix}" \
+        lib=lib \
+        sbindir=bin \
+        PAM_CAP=yes \
+        DYNAMIC=yes \
+        GOLANG=no \
+        CROSS_COMPILE="${OS_TRIPLET}-" \
+        DESTDIR="${dest_dir}" \
+        RAISE_SETFCAP=no \
+        BUILD_CC=gcc \
+        BUILD_ld=ld
+}
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+}
+
+
+build() {
+    _make -j${parallelism}
+}
+
+package() {
+    _make install
+
+    # Remove static libraries
+    rm -rf "${dest_dir}${prefix}"/lib/*.a
+
+    post_package_strip
+}

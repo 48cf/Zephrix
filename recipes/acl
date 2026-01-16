@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=acl
+version=2.3.2
+tarball_url="https://download.savannah.gnu.org/releases/acl/acl-${version}.tar.xz"
+tarball_blake2b="9f2abfddcd403df2c716c05f02a1b52453613d10948dc58a65b9ef41b44e37db6de99fb22dcfc4f6f0fb5d0319c939da61bd4e0fba2cdb5643e8087ecd34eeac"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs attr"
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

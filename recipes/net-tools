@@ -1,0 +1,37 @@
+#!/bin/bash
+
+name=net-tools
+version=2.10
+revision=1
+tarball_url="https://downloads.sourceforge.net/project/net-tools/net-tools-${version}.tar.xz"
+tarball_blake2b="0d11a5c12f6447282c65ee74428c1b9f6da9fd6d26ca558813d002fac8a4f03fd25a26231a5f4e45f88d821e9a8281e3be1fea4a832bd09afbc2239634a1c25d"
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+    yes "" | ./configure.sh ./config.in
+}
+
+build() {
+        CC="${OS_TRIPLET}-gcc" \
+        LD="${OS_TRIPLET}-ld" \
+        AR="${OS_TRIPLET}-ar" \
+        CFLAGS="${TARGET_CFLAGS}" \
+        LDFLAGS="${TARGET_LDFLAGS}" \
+        BINDIR="${prefix}/bin" \
+        SBINDIR="${prefix}/bin" \
+    make -j${parallelism}
+}
+
+package() {
+        BINDIR="${prefix}/bin" \
+        SBINDIR="${prefix}/bin" \
+    make DESTDIR="${dest_dir}" install
+
+    # these are provided by inetutils
+    rm "${dest_dir}${prefix}"/bin/{hostname,dnsdomainname,domainname}
+    rm "${dest_dir}${prefix}"/share/man/man1/{hostname,dnsdomainname,domainname}.1
+
+    post_package_strip
+}

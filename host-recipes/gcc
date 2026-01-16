@@ -1,0 +1,57 @@
+#!/bin/bash
+
+name=gcc
+from_source=gcc-host
+clean_workdirs=no
+revision=1
+imagedeps="build-essential"
+hostdeps="pkgconf"
+hostrundeps="binutils"
+deps="glibc"
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+    mkdir -p build && cd build
+
+        CFLAGS="${HOST_CFLAGS}" \
+        CXXFLAGS="${HOST_CXXFLAGS}" \
+        LDFLAGS="${HOST_LDFLAGS}" \
+        CFLAGS_FOR_TARGET="${TARGET_CFLAGS}" \
+        CXXFLAGS_FOR_TARGET="${TARGET_CXXFLAGS}" \
+    ../configure \
+        --prefix="${prefix}" \
+        --target=${OS_TRIPLET} \
+        --with-sysroot="${sysroot_dir}" \
+        --with-glibc-version="$(. "${base_dir}/recipes/glibc" && echo "${version}")" \
+        --enable-__cxa_atexit \
+        --enable-cet=auto \
+        --enable-checking=release \
+        --enable-clocale=gnu \
+        --enable-default-pie \
+        --enable-default-ssp \
+        --enable-gnu-indirect-function \
+        --enable-gnu-unique-object \
+        --enable-libstdcxx-backtrace \
+        --enable-link-serialization=1 \
+        --enable-linker-build-id \
+        --enable-languages=c,c++,lto \
+        --enable-lto \
+        --disable-multilib \
+        --enable-plugin \
+        --enable-shared \
+        --enable-host-shared \
+        --enable-threads=posix \
+        --disable-libssp \
+        --disable-libstdcxx-pch \
+        --disable-werror
+}
+
+build() {
+    make -C build -j${parallelism} all-gcc
+}
+
+package() {
+    DESTDIR="${dest_dir}" make -C build install-gcc
+
+    post_package_strip
+}

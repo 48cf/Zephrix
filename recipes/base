@@ -1,0 +1,33 @@
+#!/bin/bash
+
+name=base
+version=0.0
+revision=9
+deps="
+    base-files
+    bash
+    bzip2
+    coreutils
+    findutils
+    gawk
+    gmp
+    grep
+    gzip
+    inetutils
+    iproute2
+    iputils
+    kbd
+    linux
+    net-tools
+    openrc
+    pam
+    pciutils
+    procps-ng
+    psmisc
+    sed
+    shadow
+    tzdata
+    util-linux
+    xbps
+    xz
+"

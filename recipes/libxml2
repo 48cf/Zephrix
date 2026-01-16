@@ -1,0 +1,28 @@
+#!/bin/bash
+
+name=libxml2
+version=2.15.1
+git_url="https://gitlab.gnome.org/GNOME/libxml2.git"
+commit=b7fa62cbe8ef0df5869e000d5b690bdedd07f33e
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs icu readline zlib"
+
+configure() {
+    meson_configure \
+        -Dpython=disabled \
+        -Dhistory=enabled \
+        -Dicu=enabled \
+        -Dreadline=enabled \
+        -Dzlib=enabled
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

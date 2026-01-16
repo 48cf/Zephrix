@@ -1,0 +1,40 @@
+#!/bin/bash
+
+name=sqlite
+version=3.51.2
+tarball_url="https://sqlite.org/2026/sqlite-autoconf-3510200.tar.gz"
+tarball_blake2b="a16019a53fac5ccb3684c67b136da76f7279817a8887b387abfd7d326c36c76da896abc581251062fb46058748b34161d924f3fd9b492748b2a7f1e5d175cb17"
+revision=1
+imagedeps="build-essential"
+hostdeps="gcc pkgconf"
+deps="core-libs readline zlib"
+
+configure() {
+    "${source_dir}"/configure \
+        --host="${OS_TRIPLET}" \
+        --prefix="${prefix}" \
+        --sysconfdir=/etc \
+        --localstatedir=/var \
+        --bindir="${prefix}/bin" \
+        --sbindir="${prefix}/bin" \
+        --libdir="${prefix}/lib" \
+        --soname=legacy \
+        --disable-static \
+        --enable-shared \
+        --enable-fts4 \
+        --enable-fts5 \
+        --enable-readline \
+        --with-readline-header="${sysroot_dir}${prefix}/include/readline/readline.h" \
+        CFLAGS="$TARGET_CFLAGS -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_ENABLE_UNLOCK_NOTIFY=1 -DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_SECURE_DELETE=1" \
+        LDFLAGS="$TARGET_LDFLAGS"
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

@@ -1,0 +1,13 @@
+[binaries]
+c = 'x86_64-jinx-linux-gnu-gcc'
+cpp = 'x86_64-jinx-linux-gnu-g++'
+ar = 'x86_64-jinx-linux-gnu-ar'
+nm = 'x86_64-jinx-linux-gnu-nm'
+strip = 'x86_64-jinx-linux-gnu-strip'
+pkg-config = 'x86_64-jinx-linux-gnu-pkg-config'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'

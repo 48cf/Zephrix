@@ -1,0 +1,35 @@
+#!/bin/bash
+
+name=iproute2
+version=6.18.0
+tarball_url="https://mirrors.edge.kernel.org/pub/linux/utils/net/iproute2/iproute2-${version}.tar.xz"
+tarball_blake2b="03af6c56beb8717f1d2ce77d91db1293188a45ed6b491924c37a6d7956da1b92106198503fc27dc12301648c2c0c5358883ce0fff046fb53e6e8be004696d6fd"
+revision=1
+imagedeps="build-essential"
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+
+        CC="${OS_TRIPLET}-gcc" \
+        LD="${OS_TRIPLET}-ld" \
+        AR="${OS_TRIPLET}-ar" \
+        PKG_CONFIG="${OS_TRIPLET}-pkg-config" \
+        CFLAGS="${TARGET_CFLAGS}" \
+        LDFLAGS="${TARGET_LDFLAGS}" \
+    ./configure \
+        --prefix="${prefix}" \
+        --libdir="${prefix}/lib" \
+        --color auto
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install SBINDIR="${prefix}/bin"
+
+    post_package_strip
+}

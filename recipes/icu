@@ -1,0 +1,42 @@
+#!/bin/bash
+
+name=icu
+version=78.2
+tarball_url="https://github.com/unicode-org/icu/releases/download/release-${version}/icu4c-${version}-sources.tgz"
+tarball_blake2b="1a617708bc67f86b4baa52b4feb4c51353b83a4d863607906d794193b32e90b1e26f6d345298ce4fbac5f749c28e894b952d1c01776d3bcd755fe3e8bcfa10ef"
+revision=1
+source_imagedeps="build-essential pkgconf"
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+prepare() {
+    cp source/config/mh-linux source/config/mh-unknown
+    mkdir -p cross-build && cd cross-build
+
+    "${source_dir}/source/configure" \
+        CFLAGS="${HOST_CFLAGS}" \
+        CXXFLAGS="${HOST_CXXFLAGS}" \
+        LDFLAGS="${HOST_LDFLAGS}" \
+        --prefix=/usr/local
+
+    make -j${parallelism}
+}
+
+configure() {
+    config_data_packaging=library
+
+        configure_script_path="${source_dir}/source/configure" \
+    autotools_configure \
+        --with-cross-build="${source_dir}/cross-build" \
+        --with-data-packaging="${config_data_packaging}"
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

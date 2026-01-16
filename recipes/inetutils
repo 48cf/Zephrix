@@ -1,0 +1,62 @@
+#!/bin/bash
+
+name=inetutils
+version=2.7
+tarball_url="https://ftp.gnu.org/gnu/inetutils/inetutils-${version}.tar.gz"
+tarball_blake2b="0d651cf458dd7c42955be17f82c8f022e7048c694daa94f14fbc15969d628d1e017a05235353a03de8a69dd3f349eb1e4adf89e7dffc82f782858506738f9a42"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs libcap ncurses pam readline"
+
+prepare() {
+    sed -i '/# include <curses.h>/a # include <term.h>' telnet/telnet.c telnetd/utility.c
+}
+
+configure() {
+    autotools_configure \
+        LIBS="-lncursesw -ltinfow" \
+        --with-pam \
+        --enable-ftp \
+        --enable-ftpd \
+        --enable-telnet \
+        --enable-telnetd \
+        --enable-talk \
+        --enable-talkd \
+        --enable-rlogin \
+        --enable-rlogind \
+        --enable-rsh \
+        --enable-rshd \
+        --enable-rcp \
+        --enable-hostname \
+        --enable-dnsdomainname \
+        --disable-rexec \
+        --disable-rexecd \
+        --disable-tftp \
+        --disable-tftpd \
+        --disable-ping \
+        --disable-ping6 \
+        --disable-logger \
+        --disable-syslogd \
+        --disable-inetd \
+        --disable-whois \
+        --disable-uucpd \
+        --disable-ifconfig \
+        --disable-traceroute
+
+    sed -i '/HAVE_CURSES_TGETENT/c #define HAVE_CURSES_TGETENT 1' config.h
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    # XXX: unknown why these aren't executable
+    # chmod 0755 ${dest_dir}/${prefix}/bin/ping
+    # chmod 0755 ${dest_dir}/${prefix}/bin/ping6
+    # chmod 0755 ${dest_dir}/${prefix}/bin/traceroute
+
+    post_package_strip
+}

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+name=base-files
+version=0.0
+source_dir=base-files
+revision=1
+
+package() {
+    cp -r ${source_dir}/. "${dest_dir}"/
+
+    cat <<'EOF' >"${dest_dir}"/INSTALL
+#! /bin/sh
+
+export PATH="/usr/bin:/usr/local/bin:/usr/local/sbin"
+
+ACTION="$1"
+
+case "${ACTION}" in
+pre)
+    ;;
+post)
+    chown -R 1000:1000 home/user
+
+    chmod 750 root
+    chmod 777 tmp
+    chmod 777 run
+    chmod 710 home/user
+    ;;
+esac
+
+exit 0
+EOF
+    chmod +x "${dest_dir}"/INSTALL
+}

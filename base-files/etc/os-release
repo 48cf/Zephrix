@@ -1,0 +1,7 @@
+NAME=Jinx Linux
+PRETTY_NAME=Jinx Linux
+ID=jinx
+BUILD_ID=rolling
+HOME_URL="https://github.com/48cf/jinix"
+SUPPORT_URL="https://github.com/48cf/jinix/issues"
+BUG_REPORT_URL="https://github.com/48cf/jinix/issues"

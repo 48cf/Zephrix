@@ -1,0 +1,151 @@
+#!/bin/bash
+
+name=udevd
+version=256.17
+revision=1
+tarball_url="https://github.com/systemd/systemd/archive/v${version}/systemd-${version}.tar.gz"
+tarball_blake2b="4a0cf0d2c6fa051c8396e470c2a97d099a6144af8d8e46e8404f52bbeef0d0d41aa1da28fe5e9ede1a8335a7bf310553814ee000b7a78295396bfde0c6251f1f"
+imagedeps="build-essential gperf patchelf python3-jinja2"
+hostdeps="gcc pkgconf"
+deps="core-libs acl libcap kmod pam-bootstrap util-linux"
+
+configure() {
+    meson_configure \
+        -Dacl=enabled \
+        -Dpam=enabled \
+        -Dadm-group=false \
+        -Danalyze=false \
+        -Dapparmor=disabled \
+        -Daudit=disabled \
+        -Dbacklight=false \
+        -Dbinfmt=false \
+        -Dbpf-framework=disabled \
+        -Dbzip2=disabled \
+        -Dcoredump=false \
+        -Ddbus=disabled \
+        -Delfutils=disabled \
+        -Denvironment-d=false \
+        -Dfdisk=disabled \
+        -Dgcrypt=disabled \
+        -Dglib=disabled \
+        -Dgshadow=false \
+        -Dgnutls=disabled \
+        -Dhibernate=false \
+        -Dhostnamed=false \
+        -Didn=false \
+        -Dima=false \
+        -Dinitrd=false \
+        -Dfirstboot=false \
+        -Dldconfig=false \
+        -Dlibcryptsetup=disabled \
+        -Dlibcurl=disabled \
+        -Dlibfido2=disabled \
+        -Dlibidn=disabled \
+        -Dlibidn2=disabled \
+        -Dlibiptc=disabled \
+        -Dlocaled=false \
+        -Dlogind=false \
+        -Dlz4=disabled \
+        -Dmachined=false \
+        -Dmicrohttpd=disabled \
+        -Dnetworkd=false \
+        -Dnscd=false \
+        -Dnss-myhostname=false \
+        -Dnss-resolve=disabled \
+        -Dnss-systemd=false \
+        -Doomd=false \
+        -Dopenssl=disabled \
+        -Dp11kit=disabled \
+        -Dpam=disabled \
+        -Dpcre2=disabled \
+        -Dpolkit=disabled \
+        -Dportabled=false \
+        -Dpstore=false \
+        -Dpwquality=disabled \
+        -Drandomseed=false \
+        -Dresolve=false \
+        -Drfkill=false \
+        -Dseccomp=disabled \
+        -Dsmack=false \
+        -Dsysext=false \
+        -Dtimedated=false \
+        -Dtimesyncd=false \
+        -Dtpm=false \
+        -Dqrencode=disabled \
+        -Dquotacheck=false \
+        -Duserdb=false \
+        -Dutmp=false \
+        -Dvconsole=false \
+        -Dwheel-group=false \
+        -Dxdg-autostart=false \
+        -Dxkbcommon=disabled \
+        -Dxz=disabled \
+        -Dzlib=disabled \
+        -Dzstd=disabled
+}
+
+build() {
+    meson compile -j${parallelism} \
+        udevadm \
+        systemd-hwdb \
+        libudev \
+        src/libudev/libudev.pc \
+        src/udev/udev.pc \
+        man/udev.conf.5 \
+        man/systemd.link.5 \
+        man/hwdb.7 \
+        man/udev.7 \
+        man/systemd-hwdb.8 \
+        man/systemd-udevd.service.8 \
+        man/udevadm.8 \
+        man/libudev.3 \
+        man/udev_device_get_syspath.3 \
+        man/udev_device_has_tag.3 \
+        man/udev_device_new_from_syspath.3 \
+        man/udev_enumerate_add_match_subsystem.3 \
+        man/udev_enumerate_new.3 \
+        man/udev_enumerate_scan_devices.3 \
+        man/udev_list_entry.3 \
+        man/udev_monitor_filter_update.3 \
+        man/udev_monitor_new_from_netlink.3 \
+        man/udev_monitor_receive_device.3 \
+        man/udev_new.3 \
+        hwdb.d/60-autosuspend-chromiumos.hwdb \
+        rules.d/50-udev-default.rules \
+        rules.d/60-persistent-storage.rules \
+        rules.d/64-btrfs.rules
+}
+
+_set_rpath() {
+    patchelf --set-rpath "${prefix}/lib/systemd" "$@"
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild --tags libudev
+
+    for x in udevadm systemd-hwdb; do
+        install -Dm755 "${x}" "${dest_dir}${prefix}/bin/${x}"
+        _set_rpath "${dest_dir}${prefix}/bin/${x}"
+    done
+
+    mkdir -p "${dest_dir}${prefix}/lib/systemd"
+    ln -sf ../../bin/udevadm "${dest_dir}${prefix}/lib/systemd/systemd-udevd"
+
+    rm -f rules.d/99-systemd.rules
+    for x in rules.d/*.rules; do
+        install -Dm644 "${x}" "${dest_dir}${prefix}/lib/udev/rules.d/$(basename "${x}")"
+    done
+
+    for x in hwdb.d/*.hwdb; do
+        install -Dm644 "${x}" "${dest_dir}${prefix}/lib/udev/hwdb.d/$(basename "${x}")"
+    done
+
+    install -Dm644 src/udev/udev.pc "${dest_dir}${prefix}/share/pkgconfig/udev.pc"
+    install -Dm644 src/libudev/libudev.pc "${dest_dir}${prefix}/lib/pkgconfig/libudev.pc"
+
+    for x in man/{udev.conf.5,systemd.link.5,hwdb.7,systemd-hwdb.8,udev.7,udevadm.8,libudev.3,udev_*.3}; do
+        install -Dm644 "${x}" "${dest_dir}${prefix}/share/man/man${x##*.}/$(basename "${x}")"
+    done
+
+    post_package_strip
+}
