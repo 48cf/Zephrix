@@ -1,0 +1,39 @@
+#!/bin/bash
+
+name=metalog
+version=20260105
+tarball_url="https://github.com/hvisage/metalog/archive/refs/tags/${version}.tar.gz"
+tarball_blake2b="10b38a2613c79cf6788ae5a389bb1fd9ca1b80239506e11809ceb83e8e067e872185bac13e142e9d810753b7d38fd1416172f6ea987df9c40a7dcf48ad8a28d9"
+revision=1
+source_deps="autoconf-archive"
+source_hostdeps="autoconf automake pkgconf"
+hostdeps="gcc pkgconf"
+deps="core-libs pcre2"
+
+prepare() {
+    autoreconf -fvi -I"${sysroot_dir}/usr/share/aclocal"
+}
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    # Install OpenRC conf.d and init.d files.
+    mkdir -pv "${dest_dir}"/etc/conf.d
+    cp -v "${base_dir}"/build-support/metalog/metalog.confd "${dest_dir}"/etc/conf.d/metalog
+
+    mkdir -pv "${dest_dir}"/etc/init.d
+    cp -v "${base_dir}"/build-support/metalog/metalog.initd "${dest_dir}"/etc/init.d/metalog
+
+    mkdir -pv "${dest_dir}"/etc/runlevels/default
+    ln -sv ../../init.d/metalog "${dest_dir}"/etc/runlevels/default/metalog
+
+    post_package_strip
+}

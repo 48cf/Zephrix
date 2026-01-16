@@ -1,0 +1,14 @@
+# /etc/conf.d/metalog
+
+# Some useful options:
+#  -a   Log with buffering
+#  -s   Log without buffering
+# See `metalog --help` for more
+
+METALOG_OPTS=""
+
+# Space delimited list of devices to write "console" messages to
+CONSOLE="/dev/tty10"
+
+# Format of logging (make sure you use single quotes)
+FORMAT='$1 [$2] $3'
