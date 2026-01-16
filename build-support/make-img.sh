@@ -38,6 +38,71 @@ $SUDO --preserve-env "${source_dir}"/jinx install "sysroot" base $PKGS_TO_INSTAL
 
 set +f
 
+# Create and enable the first boot service.
+cat <<'EOF' | $SUDO tee sysroot/usr/bin/first-boot-setup >/dev/null
+#!/bin/bash
+
+set -e
+
+echo "=== First boot setup ==="
+echo ""
+echo -n "Enter your desired hostname (default: jinx): "
+read -r hostname_input
+
+if [ -z "$hostname_input" ]; then
+    hostname_input="jinx"
+fi
+
+echo "$hostname_input" >/etc/hostname
+echo "# Hostname fallback if /etc/hostname does not exist" >/etc/conf.d/hostname
+echo "hostname=\"$hostname_input\"" >>/etc/conf.d/hostname
+echo "Hostname set to: $hostname_input"
+
+rc-service hostname restart &>/dev/null
+
+echo ""
+pwconv
+passwd root
+
+echo ""
+echo "Running system configuration..."
+xbps-reconfigure -a &>/dev/null
+
+echo "Setup complete! Press any key to continue..."
+read -r -n 1 -s
+EOF
+
+cat <<'EOF' | $SUDO tee sysroot/etc/init.d/first-boot >/dev/null
+#!/usr/bin/openrc-run
+
+description="First boot setup"
+
+depend() {
+    need localmount
+    after bootmisc logger
+}
+
+start() {
+    # Save current VT
+    current_vt=$(fgconsole)
+
+    # Run first-boot-setup on tty2
+    openvt -c 9 -s -w -- /usr/bin/first-boot-setup
+
+    # Switch back to original VT
+    chvt "${current_vt}"
+
+    # Disable this service after first run
+    rc-update del first-boot default
+
+    eend $?
+}
+EOF
+
+$SUDO chmod +x sysroot/usr/bin/first-boot-setup
+$SUDO chmod +x sysroot/etc/init.d/first-boot
+$SUDO ln -s ../../init.d/first-boot sysroot/etc/runlevels/default/first-boot
+
 if ! [ -d host-pkgs/limine ]; then
     "${source_dir}"/jinx host-build limine
 fi
