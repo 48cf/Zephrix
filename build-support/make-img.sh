@@ -46,11 +46,11 @@ set -e
 
 echo "=== First boot setup ==="
 echo ""
-echo -n "Enter your desired hostname (default: jinx): "
+echo -n "Enter your desired hostname (default: zephrix): "
 read -r hostname_input
 
 if [ -z "$hostname_input" ]; then
-    hostname_input="jinx"
+    hostname_input="zephrix"
 fi
 
 echo "$hostname_input" >/etc/hostname

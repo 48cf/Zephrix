@@ -1,7 +1,7 @@
-NAME=Jinx Linux
-PRETTY_NAME=Jinx Linux
-ID=jinx
+NAME=Zephrix
+PRETTY_NAME=Zephrix
+ID=zephrix
 BUILD_ID=rolling
-HOME_URL="https://github.com/48cf/jinix"
-SUPPORT_URL="https://github.com/48cf/jinix/issues"
-BUG_REPORT_URL="https://github.com/48cf/jinix/issues"
+HOME_URL="https://github.com/48cf/Zephrix"
+SUPPORT_URL="https://github.com/48cf/Zephrix/issues"
+BUG_REPORT_URL="https://github.com/48cf/Zephrix/issues"
