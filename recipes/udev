@@ -1,6 +1,6 @@
 #!/bin/bash
 
-name=udevd
+name=udev
 version=256.17
 revision=1
 tarball_url="https://github.com/systemd/systemd/archive/v${version}/systemd-${version}.tar.gz"
@@ -129,6 +129,8 @@ package() {
     done
 
     mkdir -p "${dest_dir}${prefix}/lib/systemd"
+    install -Dm644 src/shared/libsystemd-shared-${version%%.*}.so "${dest_dir}${prefix}/lib/systemd/"
+
     ln -sf ../../bin/udevadm "${dest_dir}${prefix}/lib/systemd/systemd-udevd"
 
     rm -f rules.d/99-systemd.rules
@@ -143,9 +145,25 @@ package() {
     install -Dm644 src/udev/udev.pc "${dest_dir}${prefix}/share/pkgconfig/udev.pc"
     install -Dm644 src/libudev/libudev.pc "${dest_dir}${prefix}/lib/pkgconfig/libudev.pc"
 
+    mkdir -p "${dest_dir}${prefix}/include"
+    install -Dm644 "${source_dir}"/src/libudev/libudev.h "${dest_dir}${prefix}/include/libudev.h"
+
     for x in man/{udev.conf.5,systemd.link.5,hwdb.7,systemd-hwdb.8,udev.7,udevadm.8,libudev.3,udev_*.3}; do
         install -Dm644 "${x}" "${dest_dir}${prefix}/share/man/man${x##*.}/$(basename "${x}")"
     done
+
+    mkdir -p "${dest_dir}/etc/init.d"
+    mkdir -p "${dest_dir}/etc/conf.d"
+
+    for x in udev{,-settle,-trigger}; do
+        install -Dm755 "${base_dir}/build-support/udev/${x}.initd" "${dest_dir}/etc/init.d/${x}"
+        install -Dm644 "${base_dir}/build-support/udev/${x}.confd" "${dest_dir}/etc/conf.d/${x}"
+    done
+
+    mkdir -p "${dest_dir}/etc/runlevels/sysinit"
+    ln -sf ../../init.d/udev "${dest_dir}/etc/runlevels/sysinit/udev"
+    ln -sf ../../init.d/udev-settle "${dest_dir}/etc/runlevels/sysinit/udev-settle"
+    ln -sf ../../init.d/udev-trigger "${dest_dir}/etc/runlevels/sysinit/udev-trigger"
 
     post_package_strip
 }

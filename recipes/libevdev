@@ -1,0 +1,25 @@
+#!/bin/bash
+
+name=libevdev
+version=1.13.6
+tarball_url="https://www.freedesktop.org/software/libevdev/libevdev-${version}.tar.xz"
+tarball_blake2b="18ebeb8915913d451372df8d58a6d8228df0416c87b507480562ebe144b073f4f03a5dcf6ab93ecaa3f32206bf91ebad64046ea722134ed221a479a2d59fe13a"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs mtdev"
+
+configure() {
+    meson_configure \
+        -Ddocumentation=disabled \
+        -Dtests=disabled
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

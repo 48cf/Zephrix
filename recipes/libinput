@@ -1,0 +1,28 @@
+#!/bin/bash
+
+name=libinput
+version=1.30.1
+tarball_url="https://gitlab.freedesktop.org/libinput/libinput/-/archive/${version}/libinput-${version}.tar.gz"
+tarball_blake2b="b56d8248c48b23a97b686a2430e5ca6b2359ae148a068ffd0549260de354767eda2468ac0133e5841ded621be33cacac086ac9038f515a803a2e8c6537e6258e"
+revision=2
+hostdeps="gcc pkgconf"
+deps="core-libs libevdev mtdev udev"
+
+configure() {
+    meson_configure \
+        -Ddebug-gui=false \
+        -Ddocumentation=false \
+        -Dtests=false \
+        -Dlibwacom=false \
+        -Dudev-dir="${prefix}/lib/udev"
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}
