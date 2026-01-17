@@ -4,7 +4,7 @@ name=mesa
 version=25.3.3
 tarball_url="https://archive.mesa3d.org/mesa-${version}.tar.xz"
 tarball_blake2b="1f380c2fbd7c267a68757fc0d32272daddc4c376a65afda7df4e7a24a9597558ba8e93678f7163499e38d724063eb4446820ac43983a390ac34b15870c83009b"
-revision=1
+revision=2
 imagedeps="glslang-tools libwayland-bin llvm python3-mako python3-pycparser python3-yaml"
 hostdeps="gcc pkgconf"
 deps="
@@ -26,7 +26,6 @@ deps="
     libxshmfence
     libxxf86vm
     llvm
-    lua
     wayland-protocols
     zlib
     zstd
