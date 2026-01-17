@@ -4,7 +4,7 @@ name=xorg-server
 version=21.1.21
 git_url="https://gitlab.freedesktop.org/xorg/xserver.git"
 commit=312a25c65c8a918fea2cc77abd0db07ec0fc421c
-revision=2
+revision=3
 hostdeps="gcc pkgconf"
 deps="
     core-libs
@@ -70,6 +70,10 @@ configure() {
         -Ddrm=true \
         -Dglamor=false \
         -Dglx=true
+
+    # HACK: pkgconf prepends paths with sysroot dir, so we need to fix them
+    # in the generated dix-config.h file, otherwise dri drivers won't be loaded
+    sed -i "s|/sysroot||g" include/dix-config.h
 }
 
 build() {
