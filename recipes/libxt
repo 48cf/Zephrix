@@ -1,0 +1,25 @@
+#!/bin/bash
+
+name=libxt
+version=1.3.1
+tarball_url="https://www.x.org/archive/individual/lib/libXt-${version}.tar.gz"
+tarball_blake2b="124036245a76703a5bb2379fd0b6605dc665cc58b9df657cfc3b0214574dcad6f46490ee76be8ea7d157afa84940c5ee8edaca37983ff6ec7deb572f51985703"
+revision=1
+imagedeps="build-essential"
+hostdeps="gcc pkgconf"
+deps="core-libs libsm libx11"
+
+configure() {
+    autotools_configure \
+        --with-appdefaultdir=/etc/X11/app-defaults
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

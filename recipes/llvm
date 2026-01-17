@@ -1,0 +1,35 @@
+#!/bin/bash
+
+name=llvm
+version=21.1.8
+tarball_url="https://github.com/llvm/llvm-project/releases/download/llvmorg-${version}/llvm-project-${version}.src.tar.xz"
+tarball_blake2b="0d3d4ee920f8e5db50e98152616f16004c74df0e7313cc86d893428fb7b1c875109988a5e40ea6f2e5d0fef53c7bfe2fc2b69e84807f6eb440b03afa1b228a36"
+revision=1
+imagedeps="build-essential"
+hostdeps="gcc pkgconf"
+deps="core-libs libffi libxml2 ncurses zlib zstd"
+
+configure() {
+        cmake_source_dir="${source_dir}/llvm" \
+    cmake_configure \
+        -UBUILD_SHARED_LIBS \
+        -UENABLE_STATIC \
+        -DLLVM_LINK_LLVM_DYLIB=ON \
+        -DLLVM_ENABLE_FFI=ON \
+        -DLLVM_ENABLE_EH=ON \
+        -DLLVM_ENABLE_RTTI=ON \
+        -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
+        -DLLVM_DEFAULT_TARGET_TRIPLE=${OS_TRIPLET} \
+        -DLLVM_HOST_TRIPLE=${OS_TRIPLET} \
+        -Wno-dev
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}

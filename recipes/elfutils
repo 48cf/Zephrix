@@ -1,0 +1,33 @@
+#!/bin/bash
+
+name=elfutils
+version=0.194
+tarball_url="https://sourceware.org/elfutils/ftp/${version}/elfutils-${version}.tar.bz2"
+tarball_blake2b="dd1fd1ba83330aa3313bd96614851a59411ea8e1004afda23791296de03960db5e193ee9ded4dd159d80c954efecc2cb5438cce986817d537c72d5ff887faf16"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs bzip2 xz zlib zstd"
+
+configure() {
+    autotools_configure \
+        --disable-libdebuginfod \
+        --disable-debuginfod \
+        --program-prefix="eu-" \
+        --with-bzlib \
+        --with-lzma \
+        --with-zlib \
+        --with-zstd
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    # Remove static libraries
+    rm -rf "${dest_dir}${prefix}"/lib/*.a
+
+    post_package_strip
+}

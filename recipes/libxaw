@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=libxaw
+version=1.0.16
+tarball_url="https://www.x.org/archive/individual/lib/libXaw-${version}.tar.gz"
+tarball_blake2b="d303a6b1f586ce96c6aa2505929cd019c7383d77f55ec6be27765190fcddfa7e32e896ca8497148c9771b21f09960b5de836328608261b23da8dd892b9c3ee99"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs libxmu libxpm"
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

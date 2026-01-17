@@ -1,0 +1,98 @@
+#!/bin/bash
+
+name=lua
+version=5.5.0
+tarball_url="https://www.lua.org/ftp/lua-${version}.tar.gz"
+tarball_blake2b="f78837561812d797e3b8f59c4f27e3f7de5d9ec081e2eb254b8228b257ef22f2fb1acda482ec289e9d27e784ad98f28694bd529f10defd62acad9fe36daf647d"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs readline"
+
+build() {
+    mkdir -p lua
+    cp -rp "${source_dir}"/. ./lua/
+
+    mkdir -p lua++
+    cp -rp "${source_dir}"/. ./lua++
+
+    make -C lua \
+        CC=${OS_TRIPLET}-gcc \
+        AR="${OS_TRIPLET}-ar rcu" \
+        RANLIB=${OS_TRIPLET}-ranlib \
+        MYCFLAGS="${TARGET_CFLAGS} -fPIC" \
+        MYLDFLAGS="${TARGET_LDFLAGS}" \
+        linux \
+        -j${parallelism}
+
+    make -C lua++ \
+        CC=${OS_TRIPLET}-g++ \
+        AR="${OS_TRIPLET}-ar rcu" \
+        RANLIB=${OS_TRIPLET}-ranlib \
+        MYCFLAGS="${TARGET_CXXFLAGS} -fPIC" \
+        MYLDFLAGS="${TARGET_LDFLAGS}" \
+        LUA_A=liblua++.a \
+        LUA_SO=liblua++.so \
+        linux \
+        -j${parallelism}
+}
+
+package() {
+    make -C lua \
+        TO_LIB="liblua.so liblua.so.${version%.*} liblua.so.${version}" \
+        INSTALL_DATA='cp -d' \
+        INSTALL_TOP="${dest_dir}${prefix}" \
+        INSTALL_MAN="${dest_dir}${prefix}"/share/man/man1 \
+        install
+
+    make -C lua++ \
+        TO_LIB="liblua++.so liblua++.so.${version%.*} liblua++.so.${version}" \
+        INSTALL_BIN=null \
+        INSTALL_INC=null \
+        INSTALL_MAN=../null \
+        INSTALL_DATA='cp -d' \
+        INSTALL_TOP="${dest_dir}${prefix}" \
+        install
+    
+    ln -sf lua "${dest_dir}${prefix}"/bin/lua${version%.*}
+    ln -sf luac "${dest_dir}${prefix}"/bin/luac${version%.*}
+    ln -sf liblua.so.${version} "${dest_dir}${prefix}/lib/liblua${version%.*}.so"
+    ln -sf liblua++.so.${version} "${dest_dir}${prefix}/lib/liblua++${version%.*}.so"
+
+    mkdir -p "${dest_dir}${prefix}"/share/doc/lua
+    install -m644 "${source_dir}"/doc/*.{png,css,html} "${dest_dir}${prefix}"/share/doc/lua
+
+    mkdir -p "${dest_dir}${prefix}"/lib/pkgconfig
+    cat <<EOF >"${dest_dir}${prefix}"/lib/pkgconfig/lua55.pc
+V=${version%.*}
+R=${version}
+
+prefix=${prefix}
+INSTALL_BIN=\${prefix}/bin
+INSTALL_INC=\${prefix}/include
+INSTALL_LIB=\${prefix}/lib
+INSTALL_MAN=\${prefix}/man/man1
+INSTALL_LMOD=\${prefix}/share/lua/\${V}
+INSTALL_CMOD=\${prefix}/lib/lua/\${V}
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: Lua
+Description: An Extensible Extension Language
+Version: \${R}
+Requires: 
+Libs: -L\${libdir} -llua -lm
+Cflags: -I\${includedir}
+EOF
+    sed 's/-llua/-llua++/g' "${dest_dir}${prefix}"/lib/pkgconfig/lua55.pc > "${dest_dir}${prefix}"/lib/pkgconfig/lua55++.pc
+
+    ln -sf lua55.pc "${dest_dir}${prefix}"/lib/pkgconfig/lua.pc
+    ln -sf lua55.pc "${dest_dir}${prefix}"/lib/pkgconfig/lua5.5.pc
+    ln -sf lua55.pc "${dest_dir}${prefix}"/lib/pkgconfig/lua-5.5.pc
+
+    ln -sf lua55++.pc "${dest_dir}${prefix}"/lib/pkgconfig/lua++.pc
+    ln -sf lua55++.pc "${dest_dir}${prefix}"/lib/pkgconfig/lua5.5++.pc
+    ln -sf lua55++.pc "${dest_dir}${prefix}"/lib/pkgconfig/lua-5.5++.pc
+
+    post_package_strip
+}

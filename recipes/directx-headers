@@ -1,0 +1,24 @@
+#!/bin/bash
+
+name=directx-headers
+version=1.618.2
+git_url="https://github.com/microsoft/DirectX-Headers.git"
+commit=dde59d560da2760fec612d6634124edc2a26b82f
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    meson_configure \
+        -Dbuild-test=false
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

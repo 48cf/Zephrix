@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=hwdata
+version=0.403
+tarball_url="https://github.com/vcrhonek/hwdata/archive/v${version}/hwdata-${version}.tar.gz"
+tarball_blake2b="fbcfdd99418c0bdbdc0c0b1de08e6a39676863fadb9f44315bdd835e2bb84db90ae5e81409ff5dbbc6133d5719cc17fe563cccd39cb0e4ecd44215df1c45638b"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+
+    ./configure \
+        --prefix="${prefix}" \
+        --disable-blacklist
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

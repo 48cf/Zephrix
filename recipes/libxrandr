@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=libxrandr
+version=1.5.4
+tarball_url="https://www.x.org/archive/individual/lib/libXrandr-${version}.tar.gz"
+tarball_blake2b="d5dd5ef33c4452fac7d2c5f16afc15d9e2dcb4e721824ca6e412c6a990ab529003e1beea087afad9dedbcceab17953e066700dac7df0b2aac2cec404335ba93f"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs libx11 libxext libxrender xorg-proto"
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

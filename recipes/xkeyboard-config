@@ -1,0 +1,24 @@
+#!/bin/bash
+
+name=xkeyboard-config
+version=2.46
+git_url="https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config.git"
+commit=4225e14a2d0fca5a4f9cb8517cf12d96ea290d84
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs xorg-xkbcomp"
+
+configure() {
+    meson_configure \
+        -Dxorg-rules-symlinks=true
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

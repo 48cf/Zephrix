@@ -1,0 +1,64 @@
+#!/bin/bash
+
+name=mesa
+version=25.3.3
+tarball_url="https://archive.mesa3d.org/mesa-${version}.tar.xz"
+tarball_blake2b="1f380c2fbd7c267a68757fc0d32272daddc4c376a65afda7df4e7a24a9597558ba8e93678f7163499e38d724063eb4446820ac43983a390ac34b15870c83009b"
+revision=1
+imagedeps="glslang-tools libwayland-bin llvm python3-mako python3-pycparser python3-yaml"
+hostdeps="gcc pkgconf"
+deps="
+    core-libs
+    directx-headers
+    elfutils
+    libarchive
+    libdisplay-info
+    libdrm
+    libexpat
+    libglvnd
+    libpng
+    libva
+    libx11
+    libxcb
+    libxext
+    libxfixes
+    libxrandr
+    libxshmfence
+    libxxf86vm
+    llvm
+    lua
+    wayland-protocols
+    zlib
+    zstd
+"
+
+configure() {
+    # TODO: Enable more drivers
+    # -Dtools=dlclose-skip,drm-shim,freedreno,glsl,intel,intel,lima,nir,nouveau,panfrost,zink
+    # -Dgallium-drivers=radeonsi,r300,r600,nouveau,freedreno,softpipe,llvmpipe,v3d,tegra,crocus,i915,svga,virgl,lima,zink,d3d12,rocket,ethosu
+    # -Dvulkan-drivers=intel_hasvk,amd,freedreno,swrast,virtio,broadcom,gfxstream
+
+    meson_configure \
+        -Db_ndebug=true \
+        -Dgallium-drivers=radeonsi,nouveau,softpipe,llvmpipe,i915,svga,virgl,zink \
+        -Dgallium-extra-hud=true \
+        -Dgallium-mediafoundation=disabled \
+        -Dgles1=disabled \
+        -Dhtml-docs=disabled \
+        -Dintel-rt=enabled \
+        -Dlibunwind=disabled \
+        -Dmicrosoft-clc=disabled \
+        -Dvideo-codecs=all \
+        -Dvulkan-drivers=amd,swrast,virtio \
+        -Dvulkan-layers=device-select,intel-nullhw,overlay,screenshot,anti-lag,vram-report-limit
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

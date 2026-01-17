@@ -1,0 +1,26 @@
+#!/bin/bash
+
+name=fontconfig
+version=2.17.1
+git_url="https://gitlab.freedesktop.org/fontconfig/fontconfig.git"
+commit=6d0a98982ec351c165c9224c8b7dbdfca3010e47
+revision=1
+imagedeps="gperf"
+hostdeps="gcc pkgconf"
+deps="core-libs freetype2 libexpat libxml2"
+
+configure() {
+    meson_configure \
+        -Dxml-backend=libxml2 \
+        -Dtests=disabled
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

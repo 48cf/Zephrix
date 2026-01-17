@@ -1,0 +1,24 @@
+#!/bin/bash
+
+name=wayland-protocols
+version=1.47
+tarball_url="https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/${version}/downloads/wayland-protocols-${version}.tar.xz"
+tarball_blake2b="2b6fcd847016ccd0a8fb5e47a6429274a34ce414948f02da0d56d51855dc732c56c8266be38388deacb6af6491146da0049f6e003cec823a1d362bd2f429e678"
+revision=1
+imagedeps="libwayland-bin pkg-config"
+hostdeps="gcc pkgconf"
+deps="core-libs wayland"
+
+configure() {
+    meson_configure
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}
