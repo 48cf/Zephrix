@@ -4,9 +4,9 @@ name=dbus
 version=1.16.2
 git_url="https://gitlab.freedesktop.org/dbus/dbus.git"
 commit=958bf9db2100553bcd2fe2a854e1ebb42e886054
-revision=1
+revision=2
 hostdeps="gcc pkgconf"
-deps="core-libs libexpat"
+deps="core-libs elogind libexpat"
 
 configure() {
     meson_configure \
@@ -21,7 +21,8 @@ configure() {
         -Dkqueue=disabled \
         -Dlaunchd=disabled \
         -Dsystemd=disabled \
-        -Dmodular_tests=disabled
+        -Dmodular_tests=disabled \
+        -Delogind=enabled
 }
 
 build() {
@@ -33,6 +34,32 @@ package() {
 
     touch "${dest_dir}${prefix}"/share/dbus-1/session.d/.keep
     touch "${dest_dir}"/var/lib/dbus/.keep
+
+    mkdir -pv "${dest_dir}"/etc/init.d
+    cp -v "${base_dir}"/build-support/dbus/dbus.initd "${dest_dir}"/etc/init.d/dbus
+
+    mkdir -p "${dest_dir}"/etc/runlevels/default
+    ln -sv ../../init.d/dbus "${dest_dir}"/etc/runlevels/default/dbus
+
+    cat <<'EOF' >"${dest_dir}"/INSTALL
+#! /bin/sh
+
+export PATH="/usr/bin:/usr/local/bin:/usr/local/sbin"
+
+ACTION="$1"
+
+case "${ACTION}" in
+pre)
+    ;;
+post)
+    groupadd -g 18 messagebus
+    useradd -u 18 -g 18 -d /var/run/dbus -s /usr/bin/false -c "D-Bus Message Daemon User" messagebus
+    ;;
+esac
+
+exit 0
+EOF
+    chmod +x "${dest_dir}"/INSTALL
 
     post_package_strip
 }

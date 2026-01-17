@@ -38,13 +38,13 @@ $SUDO --preserve-env "${source_dir}"/jinx install "sysroot" base $PKGS_TO_INSTAL
 
 set +f
 
-# Create and enable the first boot service.
-cat <<'EOF' | $SUDO tee sysroot/usr/bin/first-boot-setup >/dev/null
+# Create and enable the first boot services.
+cat <<'EOF' | $SUDO tee sysroot/usr/bin/first-boot-wizard >/dev/null
 #!/bin/bash
 
 set -e
 
-echo "=== First boot setup ==="
+echo "=== First boot setup wizard ==="
 echo ""
 echo -n "Enter your desired hostname (default: zephrix): "
 read -r hostname_input
@@ -65,17 +65,36 @@ pwconv
 passwd root
 
 echo ""
-echo "Running system configuration..."
-xbps-reconfigure -a &>/dev/null
-
 echo "Setup complete! Press any key to continue..."
 read -r -n 1 -s
 EOF
 
-cat <<'EOF' | $SUDO tee sysroot/etc/init.d/first-boot >/dev/null
+cat <<'EOF' | $SUDO tee sysroot/etc/init.d/first-boot-xbps-reconfigure >/dev/null
 #!/usr/bin/openrc-run
 
-description="First boot setup"
+description="First boot (xbps-reconfigure)"
+
+depend() {
+    need localmount
+    after bootmisc
+}
+
+start() {
+    xbps-reconfigure -fa
+
+    # Disable this service after first run
+    rc-update del first-boot-xbps-reconfigure boot
+
+    rm /etc/init.d/first-boot-xbps-reconfigure
+
+    eend $?
+}
+EOF
+
+cat <<'EOF' | $SUDO tee sysroot/etc/init.d/first-boot-wizard >/dev/null
+#!/usr/bin/openrc-run
+
+description="First boot setup wizard"
 
 depend() {
     need localmount
@@ -86,22 +105,28 @@ start() {
     # Save current VT
     current_vt=$(fgconsole)
 
-    # Run first-boot-setup on tty2
-    openvt -c 9 -s -w -- /usr/bin/first-boot-setup
+    # Run first-boot-wizard on VT9
+    openvt -c 9 -s -w -- /usr/bin/first-boot-wizard
 
     # Switch back to original VT
     chvt "${current_vt}"
 
     # Disable this service after first run
-    rc-update del first-boot default
+    rc-update del first-boot-wizard default
+
+    rm /usr/bin/first-boot-wizard
+    rm /etc/init.d/first-boot-wizard
 
     eend $?
 }
 EOF
 
-$SUDO chmod +x sysroot/usr/bin/first-boot-setup
-$SUDO chmod +x sysroot/etc/init.d/first-boot
-$SUDO ln -s ../../init.d/first-boot sysroot/etc/runlevels/default/first-boot
+$SUDO chmod +x sysroot/usr/bin/first-boot-wizard
+$SUDO chmod +x sysroot/etc/init.d/first-boot-xbps-reconfigure
+$SUDO chmod +x sysroot/etc/init.d/first-boot-wizard
+
+$SUDO ln -s ../../init.d/first-boot-xbps-reconfigure sysroot/etc/runlevels/boot/
+$SUDO ln -s ../../init.d/first-boot-wizard sysroot/etc/runlevels/default/
 
 if ! [ -d host-pkgs/limine ]; then
     "${source_dir}"/jinx host-build limine
