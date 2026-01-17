@@ -1,0 +1,26 @@
+#!/bin/bash
+
+name=libclc
+version=21.1.8
+tarball_url="https://github.com/llvm/llvm-project/releases/download/llvmorg-${version}/libclc-${version}.src.tar.xz"
+tarball_blake2b="629d9e9bd6df68becf59401ba2b25a7cf393876f54c51aae7432a06f1dc3fb364588f8cc765d048195ac79a8b344c5ebc5a89328ec467c2f16a0a427140cd940"
+revision=1
+imagedeps="build-essential clang-21 llvm-21 llvm-21-dev pkg-config"
+deps="core-libs"
+
+configure() {
+    cmake "${source_dir}" \
+        -DCMAKE_INSTALL_PREFIX="${prefix}" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -GNinja
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}
