@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=gperf
+version=3.3
+tarball_url="https://ftp.gnu.org/gnu/gperf/gperf-${version}.tar.gz"
+tarball_blake2b="76fd532c4443d27031c8b2dbceaa985d0d3eed8d66f2ba2d128d027ecec0175717ab1468236b0b0405445e7457076a802458e326d5023ce28869e478ca622fa9"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}
