@@ -1,0 +1,3 @@
+xeyes &
+
+exec twm
