@@ -28,5 +28,8 @@ package() {
     ln -sfv libelogind.pc "${dest_dir}${prefix}/lib/pkgconfig/libsystemd.pc"
     ln -sfvn elogind "${dest_dir}${prefix}/include/systemd"
 
+    # We don't use eudev so we will use udev's power switch rules
+    rm -rf "${dest_dir}${prefix}"/lib/udev/rules.d/70-power-switch.rules
+
     post_package_strip
 }

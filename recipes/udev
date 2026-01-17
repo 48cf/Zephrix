@@ -7,7 +7,7 @@ tarball_url="https://github.com/systemd/systemd/archive/v${version}/systemd-${ve
 tarball_blake2b="4a0cf0d2c6fa051c8396e470c2a97d099a6144af8d8e46e8404f52bbeef0d0d41aa1da28fe5e9ede1a8335a7bf310553814ee000b7a78295396bfde0c6251f1f"
 imagedeps="build-essential gperf patchelf python3-jinja2"
 hostdeps="gcc pkgconf"
-deps="core-libs acl libcap kmod pam-bootstrap util-linux"
+deps="core-libs acl bzip2 kmod libcap lz4 pam-bootstrap pcre2 util-linux xz zlib zstd"
 
 configure() {
     meson_configure \
@@ -20,7 +20,7 @@ configure() {
         -Dbacklight=false \
         -Dbinfmt=false \
         -Dbpf-framework=disabled \
-        -Dbzip2=disabled \
+        -Dbzip2=enabled \
         -Dcoredump=false \
         -Ddbus=disabled \
         -Delfutils=disabled \
@@ -45,7 +45,7 @@ configure() {
         -Dlibiptc=disabled \
         -Dlocaled=false \
         -Dlogind=false \
-        -Dlz4=disabled \
+        -Dlz4=enabled \
         -Dmachined=false \
         -Dmicrohttpd=disabled \
         -Dnetworkd=false \
@@ -56,8 +56,8 @@ configure() {
         -Doomd=false \
         -Dopenssl=disabled \
         -Dp11kit=disabled \
-        -Dpam=disabled \
-        -Dpcre2=disabled \
+        -Dpam=enabled \
+        -Dpcre2=enabled \
         -Dpolkit=disabled \
         -Dportabled=false \
         -Dpstore=false \
@@ -79,9 +79,9 @@ configure() {
         -Dwheel-group=false \
         -Dxdg-autostart=false \
         -Dxkbcommon=disabled \
-        -Dxz=disabled \
-        -Dzlib=disabled \
-        -Dzstd=disabled
+        -Dxz=enabled \
+        -Dzlib=enabled \
+        -Dzstd=enabled
 }
 
 build() {
@@ -133,14 +133,15 @@ package() {
 
     ln -sf ../../bin/udevadm "${dest_dir}${prefix}/lib/systemd/systemd-udevd"
 
-    rm -f rules.d/99-systemd.rules
     for x in rules.d/*.rules; do
         install -Dm644 "${x}" "${dest_dir}${prefix}/lib/udev/rules.d/$(basename "${x}")"
     done
+    install -Dm644 "${source_dir}"/rules.d/*.rules "${dest_dir}${prefix}/lib/udev/rules.d/"
 
     for x in hwdb.d/*.hwdb; do
         install -Dm644 "${x}" "${dest_dir}${prefix}/lib/udev/hwdb.d/$(basename "${x}")"
     done
+    install -Dm644 "${source_dir}"/hwdb.d/*.hwdb "${dest_dir}${prefix}/lib/udev/hwdb.d/"
 
     install -Dm644 src/udev/udev.pc "${dest_dir}${prefix}/share/pkgconfig/udev.pc"
     install -Dm644 src/libudev/libudev.pc "${dest_dir}${prefix}/lib/pkgconfig/libudev.pc"
