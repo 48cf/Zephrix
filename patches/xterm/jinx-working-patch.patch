@@ -1,0 +1,13 @@
+diff --git xterm-clean/Makefile.in xterm-workdir/Makefile.in
+index 1f3181d..ca55774 100644
+--- xterm-clean/Makefile.in
++++ xterm-workdir/Makefile.in
+@@ -68,7 +68,7 @@ PIXMAPDIR_DEF	= @no_pixmapdir@-DPIXMAP_ROOTDIR=\"@PIXMAPDIR@/\"
+ CPPFLAGS	= -I. -I$(srcdir) -DHAVE_CONFIG_H @CPPFLAGS@ -DDEFCLASS=\"@APP_CLASS@\" $(PIXMAPDIR_DEF) $(EXTRA_CPPFLAGS)
+ CFLAGS		= @CFLAGS@ $(EXTRA_CFLAGS)
+ LDFLAGS		= @LDFLAGS@ @EXTRA_LDFLAGS@
+-LIBS		= @LIBS@
++LIBS		= @LIBS@ -lncursesw -ltinfow
+ 
+ prefix		= @prefix@
+ exec_prefix	= @exec_prefix@

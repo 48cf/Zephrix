@@ -1,0 +1,22 @@
+name=xterm
+version=406
+tarball_url="https://invisible-mirror.net/archives/xterm/xterm-${version}.tgz"
+tarball_blake2b="4b2b056b78037d38b89b638a9df7f76e7d47f03bb4b5f8e5d3557ce6de0092e7a575153fa9bf2801d3c775c1beb7df859eecd2c37ef06f2f5b0045429ebfc079"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs libx11 libxaw ncurses"
+
+configure() {
+    autotools_configure \
+        --enable-256-color \
+        --disable-tcap-fkeys \
+        --disable-tcap-query
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    make DESTDIR="${dest_dir}" install
+}
