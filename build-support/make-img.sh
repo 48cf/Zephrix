@@ -59,10 +59,51 @@ echo "hostname=\"$hostname_input\"" >>/etc/conf.d/hostname
 echo "Hostname set to: $hostname_input"
 
 rc-service hostname restart &>/dev/null
+pwconv
 
 echo ""
-pwconv
-passwd root
+echo -n "Would you like to create an unprivileged user now? [Y/n]: "
+read -r create_user_input
+
+if [ "$create_user_input" != "n" ] && [ "$create_user_input" != "N" ]; then
+    echo -n "Enter desired username (default: user): "
+    read -r username_input
+
+    if [ -z "$username_input" ]; then
+        username_input="user"
+    fi
+
+    useradd -m -G audio,video,input -s /bin/bash "$username_input" &>/dev/null
+    passwd "$username_input"
+fi
+
+echo ""
+echo -n "Would you like the user to have administrative privileges? [Y/n]: "
+read -r sudo_user_input
+
+if [ "$sudo_user_input" != "n" ] && [ "$sudo_user_input" != "N" ]; then
+    usermod -aG wheel,sudo "$username_input" &>/dev/null
+    echo "User '$username_input' added to wheel and sudo groups."
+
+    # Enable sudo for sudo group
+    sed -i '/%sudo ALL=(ALL:ALL) ALL/s/^# //' /etc/sudoers
+fi
+
+echo ""
+echo -n "Would you like to set the root password now? [y/N]: "
+read -r set_root_pass_input
+
+if [ "$set_root_pass_input" = "y" ] || [ "$set_root_pass_input" = "Y" ]; then
+    passwd root
+else
+    passwd -l root
+
+    if [ "$sudo_user_input" = "n" ] || [ "$sudo_user_input" = "N" ]; then
+        echo ""
+        echo "Warning: No user with administrative privileges created and root password not set."
+        echo "You may have difficulty performing administrative tasks later."
+    fi
+fi
 
 echo ""
 echo "Setup complete! Press any key to continue..."
