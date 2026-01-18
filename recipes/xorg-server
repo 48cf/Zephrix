@@ -4,7 +4,7 @@ name=xorg-server
 version=21.1.21
 git_url="https://gitlab.freedesktop.org/xorg/xserver.git"
 commit=312a25c65c8a918fea2cc77abd0db07ec0fc421c
-revision=3
+revision=4
 hostdeps="gcc pkgconf"
 deps="
     core-libs
@@ -26,6 +26,7 @@ deps="
     libxmu
     libxrandr
     libxrender
+    libxres
     libxshmfence
     libxv
     libxxf86vm
@@ -57,7 +58,7 @@ configure() {
         -Dpciaccess=true \
         -Ddpms=true \
         -Dscreensaver=true \
-        -Dxres=false \
+        -Dxres=true \
         -Dxvmc=false \
         -Dsystemd_logind=false \
         -Dsecure-rpc=false \
