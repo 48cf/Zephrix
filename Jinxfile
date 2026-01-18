@@ -134,3 +134,13 @@ cmake_configure_noflags() {
         -GNinja \
         "$@"
 }
+
+goi_env() {
+    [[ "${imagedeps}" = *"build-essential"* ]] || die "goi_env requires build-essential in imagedeps"
+    [[ "${imagedeps}" = *"patchelf"* ]] || die "goi_env requires patchelf in imagedeps"
+    [[ "${hostdeps}" = *"gobject-introspection"* ]] || die "goi_env requires gobject-introspection in hostdeps"
+
+        GI_CROSS_LAUNCHER="${base_dir}/build-support/goi-run-wrapper" \
+        RUN_WRAPPER_LD_LIBRARY_PATH="${sysroot_dir}${prefix}/lib" \
+    "$@"
+}

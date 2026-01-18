@@ -1,0 +1,29 @@
+#!/bin/bash
+
+name=at-spi2-core
+version=2.59.0
+git_url="https://gitlab.gnome.org/GNOME/at-spi2-core.git"
+commit=c0642fdfb0bfdcb768f9e749e88452f4cdf5bad9
+revision=1
+imagedeps="build-essential patchelf"
+hostdeps="gcc pkgconf gobject-introspection"
+deps="core-libs dbus glib2 gsettings-desktop-schemas libx11 libxi libxkbcommon libxml2 libxtst"
+
+configure() {
+    meson_configure \
+        -Ddbus_daemon="${prefix}/bin/dbus-daemon" \
+        -Dsystemd_user_dir=/remove_later \
+        -Dintrospection=enabled
+}
+
+build() {
+    goi_env meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    rm -rv "${dest_dir}"/remove_later
+
+    post_package_strip
+}

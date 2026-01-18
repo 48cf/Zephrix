@@ -1,0 +1,42 @@
+#!/bin/bash
+
+name=p11-kit
+version=0.25.10
+git_url="https://github.com/p11-glue/p11-kit.git"
+commit=90dba4ded391c6232a78ee14db0da76efda7b1c3
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs libffi libtasn1"
+
+early_prepare() {
+    git submodule update --init --recursive
+}
+
+prepare() {
+    sed '20,$ d' -i ${source_dir}/trust/trust-extract-compat
+
+    cat <<EOF >>"${source_dir}/trust/trust-extract-compat"
+# Copy existing anchor modifications to /etc/ssl/local
+${prefix}/libexec/make-ca/copy-trust-modifications
+
+# Update trust stores
+${prefix}/bin/make-ca -r
+EOF
+}
+
+configure() {
+    meson_configure \
+        -Dtrust_paths=/etc/pki/anchors
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    ln -svf "../libexec/p11-kit/trust-extract-compat" "${dest_dir}${prefix}/bin/update-ca-certificates"
+
+    post_package_strip
+}

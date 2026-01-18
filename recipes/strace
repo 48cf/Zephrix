@@ -1,0 +1,26 @@
+#!/bin/bash
+
+name=strace
+version=6.18
+tarball_url="https://github.com/strace/strace/releases/download/v${version}/strace-${version}.tar.xz"
+tarball_blake2b="ba9798496102c2c1d2310d9dea746d9517d58c2e9ad7e630beee294806d24a617c8a8950d0e118d6190b61ab17f5d8020d02b0a56c4740df62104dd2906206c0"
+revision=1
+imagedeps="build-essential"
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    autotools_configure \
+        --disable-gcc-Werror \
+        --enable-mpers=no
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

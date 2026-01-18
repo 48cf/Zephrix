@@ -1,0 +1,39 @@
+diff --git gobject-introspection-clean/giscanner/scannermain.py gobject-introspection-workdir/giscanner/scannermain.py
+index 21332e5..aaac433 100644
+--- gobject-introspection-clean/giscanner/scannermain.py
++++ gobject-introspection-workdir/giscanner/scannermain.py
+@@ -28,6 +28,7 @@ import sys
+ import tempfile
+ import platform
+ import shlex
++import subprocess
+ 
+ import giscanner
+ from giscanner import message, pkgconfig
+@@ -146,6 +147,17 @@ def get_windows_option_group(parser):
+ 
+ 
+ def _get_option_parser():
++    # Find libc.so path by using ldd on /bin/ls
++    output = subprocess.check_output(['ldd', '/bin/ls']).decode('utf-8')
++    paths = []
++
++    for line in output.splitlines():
++        if line.strip().startswith('libc.so'):
++            parts = line.split('=>')
++            path_part = parts[1].strip()
++            path = path_part.split(' ')[0]
++            paths.append(os.path.dirname(path))
++
+     parser = optparse.OptionParser('%prog [options] sources',
+                                    version='%prog ' + giscanner.__version__)
+     parser.add_option('', "--quiet",
+@@ -197,7 +209,7 @@ def _get_option_parser():
+                       action="append", dest="extra_libraries", default=[],
+                       help="Extra libraries to link the binary against")
+     parser.add_option("-L", "--library-path",
+-                      action="append", dest="library_paths", default=[],
++                      action="append", dest="library_paths", default=paths,
+                       help="directories to search for libraries")
+     parser.add_option("", "--header-only",
+                       action="store_true", dest="header_only", default=[],

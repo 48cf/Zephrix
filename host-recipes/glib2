@@ -1,0 +1,31 @@
+#!/bin/bash
+
+name=glib2
+from_source=glib2
+revision=1
+imagedeps="build-essential libffi-dev libpcre2-dev pkg-config zlib1g-dev"
+
+configure() {
+    meson setup "${source_dir}" \
+        --prefix="${prefix}" \
+        --sysconfdir=/etc \
+        --localstatedir=/var \
+        --libdir=lib \
+        --sbindir=bin \
+        --buildtype=release \
+        -Ddefault_library=shared \
+        -Dglib_debug=disabled \
+        -Dman-pages=disabled \
+        -Dsysprof=disabled \
+        -Dintrospection=disabled
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

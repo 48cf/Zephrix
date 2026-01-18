@@ -1,0 +1,48 @@
+#!/bin/bash
+
+name=gsettings-desktop-schemas
+version=49.1
+git_url="https://gitlab.gnome.org/GNOME/gsettings-desktop-schemas.git"
+commit=476d0e766396e1e99b9048fa9d0854482d9da7e0
+revision=1
+imagedeps="build-essential patchelf"
+hostdeps="gcc pkgconf gobject-introspection"
+deps="core-libs glib2"
+
+prepare() {
+    sed -i -r 's:"(/system):"/org/gnome\1:g' schemas/*.in
+}
+
+configure() {
+    meson_configure \
+        -Dintrospection=true
+}
+
+build() {
+    goi_env meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    cat <<EOF >"${dest_dir}"/INSTALL
+#! /bin/sh
+
+export PATH="/usr/bin:/usr/local/bin:/usr/local/sbin"
+
+ACTION="\$1"
+
+case "\${ACTION}" in
+pre)
+    ;;
+post)
+    glib-compile-schemas ${prefix}/share/glib-2.0/schemas
+    ;;
+esac
+
+exit 0
+EOF
+    chmod +x "${dest_dir}"/INSTALL
+
+    post_package_strip
+}

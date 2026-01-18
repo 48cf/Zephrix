@@ -1,0 +1,25 @@
+#!/bin/bash
+
+name=sdl2-compat
+version=2.32.62
+tarball_url="https://github.com/libsdl-org/sdl2-compat/releases/download/release-${version}/sdl2-compat-${version}.tar.gz"
+tarball_sha512=4a2643aa11f89d2c9940d33f6d6840b038099efbc8027e0af7bece042bd7791570d5785c9d2351e1124ed784c92b3613e80dba80a588c8a5aabb14cdd6382ade
+revision=1
+hostdeps="gcc pkgconf"
+deps="sdl3"
+
+configure() {
+    cmake_configure \
+        -DSDL2COMPAT_STATIC=OFF \
+        -DSDL2COMPAT_TEST_LIBRARY=OFF
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}

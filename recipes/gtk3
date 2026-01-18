@@ -1,0 +1,80 @@
+#!/bin/bash
+
+name=gtk3
+version=3.24.51
+git_url="https://gitlab.gnome.org/GNOME/gtk.git"
+commit=0d3e55cf22abc81b532a3011462b3195f1480974
+revision=1
+imagedeps="build-essential libwayland-bin patchelf"
+hostdeps="gcc pkgconf gobject-introspection"
+deps="
+    core-libs
+    at-spi2-core
+    cairo
+    dbus
+    fontconfig
+    freetype2
+    fribidi
+    gdk-pixbuf
+    glib2
+    gsettings-desktop-schemas
+    harfbuzz
+    hicolor-icon-theme
+    iso-codes
+    libepoxy
+    libx11
+    libxcb
+    libxcomposite
+    libxcursor
+    libxdamage
+    libxext
+    libxfixes
+    libxi
+    libxinerama
+    libxkbcommon
+    libxrandr
+    libxrender
+    libxslt
+    pango
+    wayland-protocols
+    webp-pixbuf-loader
+"
+
+configure() {
+    meson_configure \
+        -Dprint_backends=file \
+        -Dintrospection=true \
+        -Dx11_backend=true \
+        -Dbroadway_backend=true \
+        -Dwayland_backend=true \
+        -Dcolord=no
+}
+
+build() {
+    goi_env meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    cat <<EOF >"${dest_dir}"/INSTALL
+#! /bin/sh
+
+export PATH="/usr/bin:/usr/local/bin:/usr/local/sbin"
+
+ACTION="\$1"
+
+case "\${ACTION}" in
+pre)
+    ;;
+post)
+    glib-compile-schemas ${prefix}/share/glib-2.0/schemas
+    ;;
+esac
+
+exit 0
+EOF
+    chmod +x "${dest_dir}"/INSTALL
+
+    post_package_strip
+}

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+name=libwebp
+version=1.6.0
+git_url="https://github.com/webmproject/libwebp.git"
+commit=4fa21912338357f89e4fd51cf2368325b59e9bd9
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs freeglut libjpeg-turbo libpng libtiff sdl2-compat"
+
+configure() {
+    cmake_configure \
+        -DWEBP_ENABLE_SWAP_16BIT_CSP=ON
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}

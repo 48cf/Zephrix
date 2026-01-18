@@ -1,0 +1,25 @@
+#!/bin/bash
+
+name=pango
+version=1.57.0
+git_url="https://gitlab.gnome.org/GNOME/pango.git"
+commit=5638a41d342b661562c8ff3b97bcddd6cd5769f1
+revision=1
+imagedeps="build-essential patchelf"
+hostdeps="gcc pkgconf gobject-introspection"
+deps="core-libs cairo fontconfig freetype2 fribidi glib2 harfbuzz libx11 libxft"
+
+configure() {
+    meson_configure \
+        -Dintrospection=enabled
+}
+
+build() {
+    goi_env meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}
