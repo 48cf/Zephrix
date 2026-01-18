@@ -4,7 +4,7 @@ name=webp-pixbuf-loader
 version=0.2.7
 tarball_url="https://github.com/aruiz/webp-pixbuf-loader/archive/${version}/webp-pixbuf-loader-${version}.tar.gz"
 tarball_blake2b="7f81addbe268aab79c83f587bb26ac4d2ba8311da49d6e0b690003256e8e5206523aabc2dcb0bf6da38267872f24a6daeff0f5062a77e8e60c08610f3ee0ede7"
-revision=1
+revision=2
 hostdeps="gcc pkgconf"
 deps="core-libs gdk-pixbuf libwebp"
 
@@ -23,6 +23,25 @@ package() {
     mkdir -p "${dest_dir}${prefix}"/lib/
     mv "${dest_dir}${sysroot_dir}${prefix}"/lib/gdk-pixbuf-2.0/ "${dest_dir}${prefix}"/lib/
     rm -rf "${dest_dir}${sysroot_dir}"
+
+    cat <<'EOF' >"${dest_dir}"/INSTALL
+#! /bin/sh
+
+export PATH="/usr/bin:/usr/local/bin:/usr/local/sbin"
+
+ACTION="$1"
+
+case "${ACTION}" in
+pre)
+    ;;
+post)
+    gdk-pixbuf-query-loaders --update-cache
+    ;;
+esac
+
+exit 0
+EOF
+    chmod +x "${dest_dir}"/INSTALL
 
     post_package_strip
 }

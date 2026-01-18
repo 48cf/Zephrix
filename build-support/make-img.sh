@@ -75,6 +75,9 @@ if [ "$create_user_input" != "n" ] && [ "$create_user_input" != "N" ]; then
 
     useradd -m -G audio,video,input -s /bin/bash "$username_input" &>/dev/null
     passwd "$username_input"
+
+    echo 'dbus-launch --exit-with-session startxfce4' >"/home/${username_input}/.xinitrc"
+    chown "$username_input":"$username_input" "/home/${username_input}/.xinitrc"
 fi
 
 echo ""

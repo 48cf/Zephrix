@@ -1,0 +1,25 @@
+#!/bin/bash
+
+name=jansson
+version=2.14.1
+git_url="https://github.com/akheron/jansson.git"
+commit=ed5cae4ed0621ef409510f94270c9f8f263736d0
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    cmake_configure \
+        -DJANSSON_BUILD_SHARED_LIBS=ON \
+        -DJANSSON_BUILD_DOCS=OFF
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}

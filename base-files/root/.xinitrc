@@ -1,3 +1,0 @@
-xeyes &
-
-exec twm

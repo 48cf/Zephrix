@@ -1,0 +1,55 @@
+#!/bin/bash
+
+name=dhcpcd
+version=10.3.0
+tarball_url="https://github.com/NetworkConfiguration/dhcpcd/releases/download/v${version}/dhcpcd-${version}.tar.xz"
+tarball_blake2b="657d20b5b92769615035b5d8792c77280a2ef34a96f64f4c5a70d3ee51a24b9dec48f2a4f59b75d3e5505685eece0a4f163518fd1f027b09945287a30b075f8a"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs openssl"
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+
+        configure_script_path=./configure \
+    autotools_configure \
+        --dbdir="/var/lib/${name}" \
+        --privsepuser="${name}" \
+        --runstatedir=/run
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    make DESTDIR="${dest_dir}" install
+
+    mkdir -p "${dest_dir}/etc/init.d"
+    cp "${base_dir}"/build-support/dhcpcd/dhcpcd.initd "${dest_dir}/etc/init.d/dhcpcd"
+
+    mkdir -p "${dest_dir}/etc/runlevels/default"
+    ln -s ../../init.d/dhcpcd "${dest_dir}/etc/runlevels/default/dhcpcd"
+
+    cat <<'EOF' >"${dest_dir}"/INSTALL
+#! /bin/sh
+
+export PATH="/usr/bin:/usr/local/bin:/usr/local/sbin"
+
+ACTION="$1"
+
+case "${ACTION}" in
+pre)
+    ;;
+post)
+    groupadd -g 20 dhcpcd
+    useradd -u 20 -g 20 -d /var/lib/dhcpcd -s /usr/bin/false -c "DHCP Client Daemon User" dhcpcd
+    ;;
+esac
+
+exit 0
+EOF
+    chmod +x "${dest_dir}"/INSTALL
+
+    post_package_strip
+}

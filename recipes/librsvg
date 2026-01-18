@@ -1,0 +1,60 @@
+#!/bin/bash
+
+name=librsvg
+version=2.60.0
+revision=1
+tarball_url="https://download.gnome.org/sources/librsvg/${version%.*}/librsvg-${version}.tar.xz"
+tarball_blake2b="8831ff0aa9f2dc564ab6fd9d48d44e770831fd76107bf4ba883b1e549fdc4bcd63425336b817d6da373123e1d861faa32e205c0377b260c662c1d919a1ff42ec"
+imagedeps="bindgen build-essential cargo cargo-c patchelf rustc"
+hostdeps="gcc pkgconf gobject-introspection"
+deps="core-libs cairo gdk-pixbuf glib2 harfbuzz libidn2 libunistring libxml2 pango"
+# Needed for `cargo fetch` during prepare.
+source_imagedeps="cargo rustc"
+source_allow_network=yes
+
+prepare() {
+        CARGO_HOME="${CARGO_HOME}" \
+    cargo fetch \
+        --target "${RUST_TARGET}"
+}
+
+configure() {
+    meson_configure \
+        -Dtriplet="${RUST_TARGET}"
+}
+
+build() {
+        CARGO_HOME="${CARGO_HOME}" \
+    goi_env meson compile -j${parallelism}
+}
+
+package() {
+        DESTDIR="${dest_dir}" \
+        CARGO_HOME="${CARGO_HOME}" \
+    meson install
+
+    # Move installed pixbuf loaders to the correct location.
+    mv "${dest_dir}${sysroot_dir}${prefix}"/lib/gdk-pixbuf-2.0/ "${dest_dir}${prefix}"/lib/
+    rm -rf "${dest_dir}${sysroot_dir}"
+
+    cat <<'EOF' >"${dest_dir}"/INSTALL
+#! /bin/sh
+
+export PATH="/usr/bin:/usr/local/bin:/usr/local/sbin"
+
+ACTION="$1"
+
+case "${ACTION}" in
+pre)
+    ;;
+post)
+    gdk-pixbuf-query-loaders --update-cache
+    ;;
+esac
+
+exit 0
+EOF
+    chmod +x "${dest_dir}"/INSTALL
+
+    post_package_strip
+}

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+name=nghttp2
+version=1.68.0
+git_url="https://github.com/nghttp2/nghttp2.git"
+commit=534b74b72524e962c18c7146470914632ca7eb2d
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs brotli jansson libevent libxml2 openssl"
+
+early_prepare() {
+    git submodule update --init --recursive
+}
+
+configure() {
+    cmake_configure
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}

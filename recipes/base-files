@@ -3,7 +3,7 @@
 name=base-files
 version=0.0
 source_dir=base-files
-revision=3
+revision=4
 
 package() {
     cp -r ${source_dir}/. "${dest_dir}"/

@@ -1,0 +1,35 @@
+#!/bin/bash
+
+name=openssh
+version=10.2p1
+revision=1
+tarball_url="https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${version}.tar.gz"
+tarball_blake2b="8c031b10b1642e21b46f7d1db84ba42692e378a54af3d8e5b5c8706c3a0a06d442a02ed8803063121e7ff325ea275cad4432b9eaa6a7f47a4d7cfad504953ab6"
+hostdeps="gcc pkgconf"
+deps="core-libs openssl pam"
+
+configure() {
+    autotools_configure \
+        --disable-strip \
+        --sysconfdir=/etc/ssh \
+        --with-privsep-path=/var/lib/sshd \
+        --with-default-path="${prefix}/bin:${prefix}/local/bin" \
+        --with-superuser-path="${prefix}/bin:${prefix}/local/bin:${prefix}/sbin" \
+        --with-xauth="${prefix}/bin/xauth" \
+        --with-pid-dir=/run \
+        --with-pam
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    mkdir -pv "${dest_dir}/etc/pam.d/"
+    cp -v "${base_dir}/build-support/openssh/sshd.pam.conf" "${dest_dir}/etc/pam.d/sshd"
+    sed -i 's|^#.*UsePAM no|UsePAM yes|g' "${dest_dir}/etc/ssh/sshd_config"
+
+    post_package_strip
+}

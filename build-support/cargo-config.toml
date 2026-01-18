@@ -1,0 +1,6 @@
+[build]
+rustc = "/usr/bin/rustc"
+target = "${RUST_TARGET}"
+
+[target.${RUST_TARGET}]
+linker = "${OS_TRIPLET}-gcc"

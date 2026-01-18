@@ -4,7 +4,7 @@ name=gtk3
 version=3.24.51
 git_url="https://gitlab.gnome.org/GNOME/gtk.git"
 commit=0d3e55cf22abc81b532a3011462b3195f1480974
-revision=1
+revision=2
 imagedeps="build-essential libwayland-bin patchelf"
 hostdeps="gcc pkgconf gobject-introspection"
 deps="
@@ -21,7 +21,11 @@ deps="
     harfbuzz
     hicolor-icon-theme
     iso-codes
+    libavif
+    libcloudproviders
     libepoxy
+    libjxl
+    librsvg
     libx11
     libxcb
     libxcomposite
@@ -36,6 +40,7 @@ deps="
     libxrender
     libxslt
     pango
+    tinysparql
     wayland-protocols
     webp-pixbuf-loader
 "
@@ -47,6 +52,8 @@ configure() {
         -Dx11_backend=true \
         -Dbroadway_backend=true \
         -Dwayland_backend=true \
+        -Dtracker3=true \
+        -Dcloudproviders=true \
         -Dcolord=no
 }
 

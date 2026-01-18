@@ -16,11 +16,31 @@ OS_TRIPLET="${JINX_ARCH}-zephrix-linux-gnu"
 
 case "${JINX_ARCH}" in
     x86_64)
+        RUST_TARGET="x86_64-unknown-linux-gnu"
+
         TARGET_CFLAGS="${TARGET_CFLAGS} -march=x86-64 -mtune=generic -fcf-protection"
         TARGET_CXXFLAGS="${TARGET_CXXFLAGS} -march=x86-64 -mtune=generic -fcf-protection"
         TARGET_LDFLAGS="${TARGET_LDFLAGS} -Wl,-z,pack-relative-relocs"
         ;;
 esac
+
+CARGO_HOME="${build_dir}/cargo-home"
+
+if [ "$in_container" = "true" ] && [ "${base_dir}/build-support/cargo-config.toml" -nt "${CARGO_HOME}/config.toml" ]; then
+    mkdir -p "${CARGO_HOME}"
+
+    make_temp
+    config_tmp="${tmp}"
+
+        JINX_ARCH="${JINX_ARCH}" \
+        RUST_TARGET="${RUST_TARGET}" \
+        OS_TRIPLET="${OS_TRIPLET}" \
+    envsubst '${JINX_ARCH} ${RUST_TARGET} ${OS_TRIPLET}' \
+        <"${base_dir}/build-support/cargo-config.toml" >"${config_tmp}"
+
+    touch -r "${base_dir}/build-support/cargo-config.toml" "${config_tmp}"
+    mv -f "${config_tmp}" "${CARGO_HOME}/config.toml"
+fi
 
 post_package_strip() {
     local strip_command

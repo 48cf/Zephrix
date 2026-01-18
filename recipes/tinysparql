@@ -1,0 +1,38 @@
+#!/bin/bash
+
+name=tinysparql
+version=3.9.2
+tarball_url="https://download.gnome.org/sources/tinysparql/${version%.*}/tinysparql-${version}.tar.xz"
+tarball_blake2b="de128835e736b940f09793dcc7bd4a71680410fea8c00ab6a36d85b2d62639b3f08ddded74f4d1851c6060e5f5f82841a5ef714191a29869546549dd21d1722b"
+revision=1
+imagedeps="build-essential patchelf python3 python3-gi"
+hostdeps="gcc pkgconf gobject-introspection"
+deps="core-libs dbus glib2 icu json-glib libsoup3 sqlite"
+
+prepare() {
+    sed -e "s/'generate'/&, '--no-namespace-dir'/" \
+        -e "/--output-dir/s/@OUTPUT@/&\/tinysparql-${version}/" \
+        -i "${source_dir}/docs/reference/meson.build"
+}
+
+configure() {
+    meson_configure \
+        -Dman=false \
+        -Dvapi=disabled \
+        -Dsystemd_user_services_dir=/remove_later
+}
+
+build() {
+    goi_env meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    rm -rv "${dest_dir}"/remove_later
+
+    # Move documentation to the correct location
+    mv "${dest_dir}${prefix}/share/doc/Tsparql-3.0" "${dest_dir}${prefix}/share/doc/tinysparql"
+
+    post_package_strip
+}

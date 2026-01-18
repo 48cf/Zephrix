@@ -1,0 +1,28 @@
+#!/bin/bash
+
+name=libproxy
+version=0.5.12
+git_url="https://github.com/libproxy/libproxy.git"
+commit=99da01926b1b1e303a4d2331bbd74bed424863e7
+revision=1
+imagedeps="build-essential patchelf"
+hostdeps="gcc pkgconf gobject-introspection"
+deps="core-libs curl glib2 gsettings-desktop-schemas"
+
+configure() {
+    meson_configure \
+        -Dpacrunner-duktape=false \
+        -Ddocs=false \
+        -Dvapi=false \
+        -Dtests=false
+}
+
+build() {
+    goi_env meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}
