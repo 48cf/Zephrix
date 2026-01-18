@@ -1,0 +1,24 @@
+#!/bin/bash
+
+name=xfce4-appfinder
+version=4.21.0
+tarball_url="https://archive.xfce.org/src/xfce/xfce4-appfinder/${version%.*}/xfce4-appfinder-${version}.tar.xz"
+tarball_blake2b="1451afe0743ba0236e41c5901ececfd368fb7f4a05a72e8e7298235b47383e04486d66c56571e685b155dfecf111108fde232e9c8057ab2b2baad0b76f99d76a"
+revision=1
+imagedeps="libglib2.0-dev-bin"
+hostdeps="gcc pkgconf"
+deps="core-libs garcon libxfce4ui"
+
+configure() {
+    meson_configure
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}
