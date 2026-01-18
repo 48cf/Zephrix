@@ -4,7 +4,7 @@ name=elogind
 version=255.22
 tarball_url="https://github.com/elogind/elogind/archive/refs/tags/V${version}.tar.gz"
 tarball_blake2b="ed7f8ea68c79813e5a2bbe82dcc0d05e3e240934c255792c0931c58cc82e8639e185075692f89f017d2a70bb7a50ab07139d51431e36156bead4713d11bcd7f7"
-revision=4
+revision=5
 imagedeps="build-essential gperf python3-jinja2"
 hostdeps="gcc pkgconf"
 deps="core-libs dbus-bootstrap libcap pam-bootstrap udev"
@@ -30,6 +30,13 @@ package() {
 
     # We don't use eudev so we will use udev's power switch rules
     rm -rf "${dest_dir}${prefix}"/lib/udev/rules.d/70-power-switch.rules
+
+    # Install OpenRC service script.
+    mkdir -pv "${dest_dir}"/etc/init.d
+    cp -v "${base_dir}"/build-support/elogind/elogind.initd "${dest_dir}"/etc/init.d/elogind
+
+    mkdir -pv "${dest_dir}"/etc/runlevels/boot
+    ln -sv ../../init.d/elogind "${dest_dir}"/etc/runlevels/boot/elogind
 
     post_package_strip
 }
