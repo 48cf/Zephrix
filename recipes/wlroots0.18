@@ -1,0 +1,42 @@
+#!/bin/bash
+
+name=wlroots0.18
+version=0.18.2
+tarball_url="https://gitlab.freedesktop.org/wlroots/wlroots/-/releases/${version}/downloads/wlroots-${version}.tar.gz"
+tarball_blake2b="db88626c208085f5e3744ab90427469f828a602d3842d8fefd8fa35efa10928e5ff1f38bfc40fee69106dfb60d84847ddf3fee380fd71535482aff5a2e567dfb"
+revision=1
+imagedeps="glslang-tools hwdata libwayland-bin pkg-config"
+hostdeps="gcc pkgconf"
+deps="
+    core-libs
+    elogind
+    libdrm
+    libinput
+    libxcb
+    libxkbcommon
+    mesa
+    pixman
+    seatd
+    vulkan-icd-loader
+    wayland
+    wayland-protocols
+    xcb-util-image
+    xcb-util-wm
+    xorg-xwayland
+"
+
+configure() {
+    meson_configure \
+        -Dbackends=drm,libinput \
+        -Dexamples=false
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}
