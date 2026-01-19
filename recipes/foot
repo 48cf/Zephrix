@@ -1,0 +1,26 @@
+#!/bin/bash
+
+name=foot
+version=1.25.0
+tarball_url="https://codeberg.org/dnkl/foot/releases/download/${version}/foot-${version}.tar.gz"
+tarball_blake2b="0d3906d33a61a2c0b4bec0068bbd257a002541576e7aeb9b647792df246d67aef4cceb5c06ef2130fc9f2e81633ed35588124574728a74fce6b8bc6b32b37550"
+revision=1
+imagedeps="libwayland-bin pkg-config"
+hostdeps="gcc pkgconf"
+builddeps="tllist"
+deps="core-libs fcft fontconfig libutf8proc libxkbcommon ncurses pixman wayland wayland-protocols"
+
+configure() {
+    meson_configure \
+        -Dterminfo-base-name=foot-extra
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}
