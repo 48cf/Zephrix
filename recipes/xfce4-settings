@@ -2,7 +2,7 @@
 
 name=xfce4-settings
 version=4.21.0
-tarball_url="https://archive.xfce.org/src/xfce/xfce4-settings/4.21/xfce4-settings-${version}.tar.xz"
+tarball_url="https://archive.xfce.org/src/xfce/xfce4-settings/${version%.*}/xfce4-settings-${version}.tar.xz"
 tarball_blake2b="6b1d2e78cb2650d96dc4ee4a06e5a98093cbe11347f652eb1d3d54318bca89ea85aaabff45912db1278e972ae5a0a75fafe96c28c0eac60440cd06909f4c01fd"
 revision=1
 imagedeps="libglib2.0-dev-bin"

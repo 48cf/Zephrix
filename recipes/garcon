@@ -2,7 +2,7 @@
 
 name=garcon
 version=4.21.0
-tarball_url="https://archive.xfce.org/src/xfce/garcon/4.21/garcon-${version}.tar.xz"
+tarball_url="https://archive.xfce.org/src/xfce/garcon/${version%.*}/garcon-${version}.tar.xz"
 tarball_blake2b="0fa1f4224aacb2e5f399aaf2899c48c59e84d470f49f383ac55d1be879a301ba77ef89cd16ba8cdce0b3eaabbeb5217397b271177c1660ed77d8594afc26746d"
 revision=1
 imagedeps="build-essential patchelf"

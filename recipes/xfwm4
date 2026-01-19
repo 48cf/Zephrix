@@ -3,7 +3,7 @@
 name=xfwm4
 version=4.20.0
 revision=1
-tarball_url="https://archive.xfce.org/src/xfce/xfwm4/4.20/xfwm4-${version}.tar.bz2"
+tarball_url="https://archive.xfce.org/src/xfce/xfwm4/${version%.*}/xfwm4-${version}.tar.bz2"
 tarball_blake2b=999b50c046582241bcc565e3af313a61ee3bee7b00b359d826ed32ac2c36d25cc299810325ac81617d59a8292d2791947a51d4c1ec4949d794f999bd24d1417e
 hostdeps="gcc pkgconf"
 deps="core-libs hicolor-icon-theme libepoxy libwnck libxfce4ui libxpresent xfconf"

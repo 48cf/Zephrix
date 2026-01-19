@@ -2,7 +2,7 @@
 
 name=thunar
 version=4.21.3
-tarball_url="https://archive.xfce.org/src/xfce/thunar/4.21/thunar-${version}.tar.xz"
+tarball_url="https://archive.xfce.org/src/xfce/thunar/${version%.*}/thunar-${version}.tar.xz"
 tarball_blake2b="7b33c494353995646c2dc6ba74610be52e793267da79e7e88821da7951817223707d9b53dc15f6cd249efa38c974fa53845e817bb20bf75b6efb44be4aa1dac1"
 revision=1
 imagedeps="build-essential patchelf"
