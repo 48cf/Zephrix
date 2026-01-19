@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=tllist
+version=1.1.0
+tarball_url="https://codeberg.org/dnkl/tllist/releases/download/${version}/tllist-${version}.tar.gz"
+tarball_blake2b="c28e803ad7e45ab485bbc7886a86e1da0afa840d446137c1f5f45b101201a2eca464716569420884892a5ee34836dc6e0519fa816558acdb7207a8b38bb02076"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    meson_configure
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}
