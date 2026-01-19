@@ -1,0 +1,34 @@
+#!/bin/bash
+
+name=ace-of-penguins
+version=1.4
+tarball_url="https://www.delorie.com/store/ace/ace-${version}.tar.gz"
+tarball_blake2b=62d32bcada9a945d0a409757ca24c8c5c032e905528d56a51b95f82844c6c8057d39763016fa05015877f23313d842effeaaa362507bb049816d7cf6bdf01a1a
+revision=1
+imagedeps="build-essential libpng-dev"
+hostdeps="gcc pkgconf"
+deps="core-libs libx11 libpng libxpm zlib"
+
+configure() {
+    autotools_configure \
+        CFLAGS="${TARGET_CFLAGS} -std=gnu17" \
+        BUILD_CFLAGS="${HOST_CFLAGS}" \
+        BUILD_CPPFLAGS="${HOST_CPPFLAGS}" \
+        BUILD_LDFLAGS="${HOST_LDFLAGS}"
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    mkdir -p "${dest_dir}${prefix}/share/applications"
+    for x in $(find "${dest_dir}${prefix}/bin/" -type f); do
+        base=$(basename "${x}")
+        cp -v "${base_dir}/build-support/ace-of-penguins/${base}.desktop" "${dest_dir}${prefix}/share/applications/"
+    done
+
+    post_package_strip
+}

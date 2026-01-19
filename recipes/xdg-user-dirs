@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=xdg-user-dirs
+version=0.19
+git_url="https://gitlab.freedesktop.org/xdg/xdg-user-dirs.git"
+commit=0577968675b9d7d660b3715cf6b2e00c6d491d67
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    meson_configure
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

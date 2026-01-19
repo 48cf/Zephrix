@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=xorg-xlsfonts
+version=1.0.8
+tarball_url="https://www.x.org/pub/individual/app/xlsfonts-${version}.tar.xz"
+tarball_blake2b="16ff4ba039f3122844c44c907fbfaff0fbbe6f219bd96cf7154179cbb5865b7911c3af926750dd702917f04a103c889cccea3aa03b48d2a4a47885b448b268e4"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs libx11"
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

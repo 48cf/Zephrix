@@ -1,0 +1,24 @@
+#!/bin/bash
+
+name=xfishtank
+version=3.3.2
+tarball_url="https://ratrabbit.nl/downloads/xfishtank/xfishtank-${version}.tar.gz"
+tarball_blake2b="c90d39843d12ec1ec5446ed4df05cf553526fc092e5adc0fadf36a2c9885e0174f3509cc1f4cdece35e542f39560d6da067344dfb0ba531fca9bb4891c26071e"
+revision=1
+imagedeps="build-essential"
+hostdeps="gcc pkgconf"
+deps="core-libs gtk3 libxpm"
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}
