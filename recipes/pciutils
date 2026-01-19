@@ -4,30 +4,37 @@ name=pciutils
 version=3.14.0
 tarball_url="https://mj.ucw.cz/download/linux/pci/pciutils-3.14.0.tar.gz"
 tarball_blake2b="3ab270c4523cc1968d5f3a03d2564eff5560b60eb8307bafe44ee240a6636dc676fbf0a28effe3c9abc99bfc86a975aea066d634a5e5adaffb2c63ba226511d9"
-revision=1
+revision=2
 hostdeps="gcc pkgconf"
-deps="core-libs"
+deps="core-libs hwdata"
 
 build() {
     cp -rp "${source_dir}"/. ./
 
-    make lib/config.mk OPT="${TARGET_CFLAGS}" CC=${OS_TRIPLET}-gcc SHARED=yes DNS=no HOST=${OS_TRIPLET}
-    make OPT="${TARGET_CFLAGS}" CC=${OS_TRIPLET}-gcc SHARED=yes DNS=no HOST=${OS_TRIPLET}
+    make all -j${parallelism} \
+        OPT="${TARGET_CFLAGS}" \
+        CC="${OS_TRIPLET}-gcc" \
+        SHARED=yes \
+        DNS=no \
+        HOST="${OS_TRIPLET}" \
+        PREFIX="${prefix}" \
+        SBINDIR="${prefix}/bin" \
+        SHAREDIR="${prefix}/share/hwdata" \
+        MANDIR="${prefix}/share/man"
 }
 
 package() {
-    DESTDIR="${dest_dir}" make install \
+    make install install-lib \
+        STRIP="" \
         PREFIX="${prefix}" \
-        OPT="${TARGET_CFLAGS}" \
-        CC=${OS_TRIPLET}-gcc \
+        SBINDIR="${prefix}/bin" \
+        SHAREDIR="${prefix}/share/hwdata" \
+        MANDIR="${prefix}/share/man" \
+        DESTDIR="${dest_dir}" \
         SHARED=yes \
         DNS=no \
-        HOST=${OS_TRIPLET} \
-        STRIP=""
 
-    mkdir -p "${dest_dir}${prefix}/bin"
-    mv -v "${dest_dir}${prefix}/sbin/"* "${dest_dir}${prefix}/bin/"
-    rm -rfv "${dest_dir}${prefix}/sbin"
+    rm -rf "${dest_dir}${prefix}/share/hwdata"
 
     post_package_strip
 }
