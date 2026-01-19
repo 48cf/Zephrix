@@ -1,0 +1,51 @@
+#!/bin/bash
+
+set -e
+
+LOCALE_GEN=/etc/locale.gen
+LOCALES=/usr/share/i18n/locales
+LOCALES_OVERRIDE=/usr/local/share/i18n/locales
+
+# Remove the existing locale archive if it exists
+rm -f /usr/lib/locale/locale-archive
+
+echo "Generating locales..."
+
+while read -r locale charset; do
+    # Skip comments and empty lines
+    [[ "${locale}" =~ ^#.*$ || -z "${locale}" ]] && continue
+
+    if [ -z "${locale}" ] || [ -z "${charset}" ]; then
+        echo "Bad locale.gen entry: '${locale} ${charset}', skipping."
+    else
+        locale_base="${locale%%.*}"
+        locale_base="${locale_base%%@*}"
+
+        locale_at_suffix=""
+        if [[ "${locale}" == *"@"* ]]; then
+            locale_at_suffix="@${locale##*@}"
+        fi
+
+        echo -n "  ${locale_base}.${charset}${locale_at_suffix}... "
+
+        # Fully matching overriding locale
+        if [ -e "${LOCALES_OVERRIDE}/${locale}" ]; then
+            localedef_input="${LOCALES_OVERRIDE}/${locale}"
+        # Fully matching locale
+        elif [ -e "${LOCALES}/${locale}" ]; then
+            localedef_input="${locale}"
+        else
+            # Locale base with optional at-suffix
+            localedef_input="${locale_base}${locale_at_suffix}"
+            if [ -e "${LOCALES_OVERRIDE}/${localedef_input}" ]; then
+                localedef_input="${LOCALES_OVERRIDE}/${localedef_input}"
+            fi
+        fi
+
+        localedef -c -i "${localedef_input}" -f "${charset}" -A /usr/share/locale/locale.alias || true
+
+        echo "done!"
+    fi
+done <"${LOCALE_GEN}"
+
+echo "Locale generation complete."
