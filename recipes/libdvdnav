@@ -1,0 +1,23 @@
+#! /bin/sh
+
+name=libdvdnav
+version=7.0.0
+tarball_url="https://get.videolan.org/libdvdnav/${version}/libdvdnav-${version}.tar.xz"
+tarball_blake2b="30033deb0df9b2380f45fb9a7fddacecf443a8cf3286f3bb1d56f0a42b0dc9237a6139788101f33edda601a6b6c7db6e1e96c82affb77e13a219913942b0265d"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs libdvdread"
+
+configure() {
+    meson_configure
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

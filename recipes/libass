@@ -1,0 +1,24 @@
+#!/bin/bash
+
+name=libass
+version=0.17.4
+tarball_url="https://github.com/libass/libass/releases/download/${version}/libass-${version}.tar.xz"
+tarball_blake2b="bf9cb990253c912036657c9a2e64a7b6fc51bc8bd1729fe00ac8556eafb8bb872b4665575ee654a3910ee528d471cd413e55c68c8b4618b979afc23b04c12069"
+revision=1
+imagedeps="nasm"
+hostdeps="gcc pkgconf"
+deps="core-libs harfbuzz libunibreak fontconfig freetype2 fribidi"
+
+configure() {
+    meson_configure
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

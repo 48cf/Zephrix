@@ -1,0 +1,41 @@
+#!/bin/sh
+
+_pkg_version() {
+    _source_dir="${base_dir}/sources/x264"
+    if [ -z "${_source_dir}" ] || [ ! -d "${_source_dir}" ]; then
+        return
+    fi
+
+    "${_source_dir}/version.sh" | grep X264_POINTVER | sed -r 's/^#define X264_POINTVER "([0-9]+\.[0-9]+)\.([0-9]+) (.*)"$/\1.\2+\3/'
+}
+
+name=x264
+version="$(_pkg_version)"
+git_url="https://code.videolan.org/videolan/x264.git"
+commit="b35605ace3ddf7c1a5d67a2eb553f034aef41d55"
+shallow=no
+revision=1
+imagedeps="nasm"
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    "${source_dir}"/configure \
+        --prefix="${prefix}" \
+        --host="${OS_TRIPLET}" \
+        --cross-prefix="${OS_TRIPLET}-" \
+        --sysroot="${sysroot_dir}" \
+        --enable-shared \
+        --enable-pic \
+        --disable-cli
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

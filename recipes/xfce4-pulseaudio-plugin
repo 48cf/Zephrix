@@ -1,0 +1,25 @@
+#!/bin/bash
+
+name=xfce4-pulseaudio-plugin
+version=0.5.1
+tarball_url="https://archive.xfce.org/src/panel-plugins/xfce4-pulseaudio-plugin/${version%.*}/xfce4-pulseaudio-plugin-${version}.tar.xz"
+tarball_blake2b="1948cad2e84e7ba03d3bf23f0192efe6a7d126329c3489483122f6455cbbd2ecfcb73374c83c8fa5eba02382dddbc89a588123ab9d9532d3a55f768278634494"
+revision=1
+imagedeps="libglib2.0-dev"
+hostdeps="gcc pkgconf"
+builddeps="pulseaudio"
+deps="core-libs libcanberra libkeybinder3 libnotify libxfce4ui xfce4-panel"
+
+configure() {
+    meson_configure
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

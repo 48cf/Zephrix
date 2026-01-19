@@ -1,0 +1,27 @@
+#!/bin/bash
+
+name=neon
+version=0.36.0
+tarball_url="https://notroj.github.io/neon/neon-${version}.tar.gz"
+tarball_blake2b="a1fcbdcf22a83fd1bfa7465dad1e95583b0e8ce178e672a31663cd48cdbd7a6b03b86ef85c2c0fdb647ec4716bdef5cc270888a46de73beaa8c826ce1b7dd70b"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs libxml2 nss openssl"
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+
+        configure_script_path=./configure \
+    autotools_configure \
+        --with-ssl
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

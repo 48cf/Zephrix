@@ -1,0 +1,81 @@
+# Recipe for FFmpeg
+
+name=ffmpeg
+version=8.0.1
+tarball_url="https://ffmpeg.org/releases/ffmpeg-${version}.tar.xz"
+tarball_blake2b="fea49b663a3598d013969b22b34f7b0db677a90ef4bf27ff1ddf8b4e1d9c6eed598efa0f221baa50e4f0d9c877225b358b4192ecc9d2b725d853ef58e65379c9"
+revision=1
+imagedeps="build-essential nasm"
+hostdeps="gcc pkgconf"
+deps="
+    core-libs
+    alsa-lib
+    fdk-aac
+    fontconfig
+    freetype2
+    frei0r-plugins
+    fribidi
+    lame
+    libaom
+    libass
+    libcdio-paranoia
+    libdrm
+    libtheora
+    libva
+    libvdpau
+    libvorbis
+    libvpx
+    libwebp
+    openjpeg2
+    openssl
+    opus
+    pulseaudio
+    sdl2-compat
+    speex
+    v4l-utils
+    vulkan-icd-loader
+    x264
+    x265
+    xvidcore
+"
+
+configure() {
+    "${source_dir}/configure" \
+        --arch="${JINX_ARCH}" \
+        --target-os=linux \
+        --cross-prefix="${OS_TRIPLET}-" \
+        --prefix="${prefix}" \
+        --bindir="${prefix}/bin" \
+        --libdir="${prefix}/lib" \
+        --enable-shared \
+        --disable-static \
+        --enable-gpl \
+        --enable-version3 \
+        --enable-nonfree \
+        --disable-debug \
+        --enable-libaom \
+        --enable-libass \
+        --enable-libdrm \
+        --enable-libfdk-aac \
+        --enable-libfreetype \
+        --enable-libmp3lame \
+        --enable-libopus \
+        --enable-libpulse \
+        --enable-libtheora \
+        --enable-libvorbis \
+        --enable-libvpx \
+        --enable-libx264 \
+        --enable-libx265 \
+        --enable-openssl \
+        --enable-vulkan
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

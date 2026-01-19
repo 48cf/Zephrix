@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=libdvdread
+version=7.0.1
+tarball_url="https://get.videolan.org/libdvdread/${version}/libdvdread-${version}.tar.xz"
+tarball_blake2b="1c4588d8ceeef1c603a2b17a346237763b6a2d25dad738b985e4f66f4a76f564f68431abc77f644678bdf315f67b1c0cf127b7b46d35bd4f11a7711aed7236ff"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    meson_configure
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

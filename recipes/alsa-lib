@@ -1,0 +1,26 @@
+#!/bin/bash
+
+name=alsa-lib
+version=1.2.15
+tarball_url="https://www.alsa-project.org/files/pub/lib/alsa-lib-${version}.tar.bz2"
+tarball_blake2b="ff5af357cd661df25e024150927e2f34a0e0d34cd1fff7b4af95489f3b2da2021db415bad98fbd33bd5ec862aa889a5bfbb05a216694776bf85eb8c95c66c7de"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+
+        configure_script_path=./configure \
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    make install DESTDIR="${dest_dir}"
+
+    post_package_strip
+}

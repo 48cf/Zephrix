@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=libcdio
+version=2.3.0
+tarball_url="https://github.com/libcdio/libcdio/releases/download/${version}/libcdio-${version}.tar.gz"
+tarball_blake2b="ba7a1ac2f5797e7178349e85333fb739b0ab30804d06b2371a0fc889ff2062747928201a88441ea2da727cea0b4127ebffe1e2aba89a850185aaa184faaf233b"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs libcddb"
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

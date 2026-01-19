@@ -1,0 +1,24 @@
+#!/bin/bash
+
+name=frei0r-plugins
+version=2.5.1
+git_url="https://github.com/dyne/frei0r.git"
+commit="f081aa64d4fb99fb1f16dce7dff8d6a989794afa"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs cairo freetype2 gavl"
+
+configure() {
+    cmake_configure \
+        -DWITHOUT_OPENCV=TRUE
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}

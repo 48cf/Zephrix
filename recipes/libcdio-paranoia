@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=libcdio-paranoia
+version=10.2+2.0.2
+tarball_url="https://ftp.gnu.org/gnu/libcdio/libcdio-paranoia-${version}.tar.bz2"
+tarball_blake2b="52774f2195633a6adbccbf28ba140ca3692726b879d6c98e16f9a398100b41b7533fbb38af30dc19ad8d8dd543ddcbd1a3afad5858cce4f46c15e09391228eca"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs libcdio"
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

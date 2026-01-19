@@ -1,0 +1,24 @@
+#!/bin/bash
+
+name=libgudev
+version=238
+tarball_url="https://download.gnome.org/sources/libgudev/${version}/libgudev-${version}.tar.xz"
+tarball_blake2b="386491e78c82081e89dad897d16ea6733430a67db3f75f2d9fdee5474b074ad6fede9f08e429f4eb6feaa9bbbb982d9d039db738aac5b5ce0ffac2d3a19430d4"
+revision=1
+imagedeps="build-essential patchelf"
+hostdeps="gcc pkgconf gobject-introspection"
+deps="core-libs glib2 udev"
+
+configure() {
+    meson_configure
+}
+
+build() {
+    goi_env meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

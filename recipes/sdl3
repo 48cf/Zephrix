@@ -4,9 +4,10 @@ name=sdl3
 version=3.4.0
 tarball_url="https://github.com/libsdl-org/SDL/releases/download/release-${version}/SDL3-${version}.tar.gz"
 tarball_blake2b="4f878b13cdc139b643e04ee278d7d83aadbb6bf8aba5babc9622a8d1ea233452982232001c5d4cb72f0e8ec20f3d797f9cd07d1531829412a6dacde2146a2447"
-revision=1
+revision=2
 imagedeps="libwayland-bin"
 hostdeps="gcc pkgconf"
+builddeps="pulseaudio"
 deps="core-libs libx11 libxcursor libxext libxfixes libxi libxkbcommon libxrandr libxrender libxxf86vm mesa"
 
 configure() {
@@ -22,7 +23,7 @@ configure() {
         -DSDL_OSS=OFF \
         -DSDL_ALSA=OFF \
         -DSDL_JACK=OFF \
-        -DSDL_PULSEAUDIO=OFF \
+        -DSDL_PULSEAUDIO=ON \
         -DSDL_SNDIO=OFF \
         -DSDL_RPATH=OFF \
         -DSDL_X11=ON \

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=gsl
+version=2.8
+tarball_url="https://ftp.gnu.org/gnu/gsl/gsl-${version}.tar.gz"
+tarball_blake2b="bce739c61c599b1d5893c338ffbb08a5bf5ccfda943a3de9e0dc18f54291398d5941d217712898e81d61408401c8fcf3fdc1519623966b79b48adc47159b6ccb"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

@@ -1,0 +1,59 @@
+#!/bin/bash
+
+name=gst-plugins-bad
+version=1.26.10
+tarball_url="https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-${version}.tar.xz"
+tarball_blake2b="3e6a98819ea8b955efd9e51d97e2b49bc1f185db4dc34427c35effbbf7811ab6b4c7137f3f9e662109bcdd4fd879d17fe7ae3d68687d06f20b736fa15500e755"
+revision=1
+imagedeps="build-essential libwayland-bin patchelf"
+hostdeps="gcc pkgconf gobject-introspection"
+deps="
+    core-libs
+    curl
+    faac
+    faad2
+    fdk-aac
+    gst-plugins-base
+    gtk3
+    json-glib
+    lcms
+    libaom
+    libass
+    libdvdnav
+    libdvdread
+    libexif
+    libqrencode
+    librsvg
+    libsndfile
+    libsoup
+    libssh
+    libusb
+    libva
+    libwebp
+    libxkbcommon
+    neon
+    nettle
+    openjpeg2
+    opus
+    soundtouch
+    wayland
+    x265
+    zxing-cpp
+"
+
+configure() {
+    meson_configure \
+        -Dpackage-name="GStreamer ${version}" \
+        -Dintrospection=enabled \
+        -Dgpl=enabled
+}
+
+build() {
+    goi_env meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

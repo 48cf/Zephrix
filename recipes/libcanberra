@@ -1,0 +1,25 @@
+#!/bin/bash
+
+name=libcanberra
+version=0.30
+tarball_url="https://0pointer.de/lennart/projects/libcanberra/libcanberra-${version}.tar.xz"
+# tarball_url="https://web.archive.org/web/20260112182408/http://0pointer.de/lennart/projects/libcanberra/libcanberra-0.30.tar.xz"
+tarball_blake2b="c90c6863738b103c256eeb0907060a0f74b73ef50ac0728d2114aa558a7a1ad7cbae4184860573d3fac0032eba77327a4de94c459b99a81c3dc19da0e98adfda"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs alsa-lib gstreamer gtk3 libtool libvorbis pulseaudio"
+
+configure() {
+    autotools_configure \
+        --disable-oss
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

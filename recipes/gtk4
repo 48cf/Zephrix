@@ -1,0 +1,50 @@
+#!/bin/bash
+
+name=gtk4
+version=4.20.3
+tarball_url="https://download.gnome.org/sources/gtk/${version%.*}/gtk-${version}.tar.xz"
+tarball_blake2b="71b04ea11bfb7ba1d8532c0fac1b76ba5bf39bd3eb537c093885d2cf718d4bcb2f706a845a5893cb03fb516d1ec6a323505f7287d1ecd7d06e703f15dcaf3dcb"
+revision=1
+imagedeps="build-essential libwayland-bin patchelf"
+hostdeps="gcc pkgconf gobject-introspection"
+deps="
+    core-libs
+    fribidi
+    gdk-pixbuf
+    glib2
+    graphene
+    gst-plugins-bad
+    gst-plugins-base
+    gstreamer
+    hicolor-icon-theme
+    iso-codes
+    libcloudproviders
+    libepoxy
+    librsvg
+    libxkbcommon
+    pango
+    tinysparql
+    wayland-protocols
+"
+
+configure() {
+    meson_configure \
+        -Dintrospection=enabled \
+        -Dx11-backend=true \
+        -Dbroadway-backend=true \
+        -Dwayland-backend=true \
+        -Ddocumentation=false \
+        -Dtracker=enabled \
+        -Dcloudproviders=enabled \
+        -Dvulkan=disabled
+}
+
+build() {
+    goi_env meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

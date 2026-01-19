@@ -1,0 +1,27 @@
+#! /bin/sh
+
+name=pulseaudio
+version=17.0
+tarball_url="https://www.freedesktop.org/software/pulseaudio/releases/pulseaudio-${version}.tar.xz"
+tarball_blake2b="781ece3d507916aa681d3b0132689730a621b4d92e45f86570e4d2fdebc4c0025ebe7f7a05046545f9b26caca513e8975f12498fa314524bc67eacaea72842fa"
+revision=1
+imagedeps="libxml-parser-perl"
+hostdeps="gcc pkgconf"
+deps="core-libs alsa-lib dbus fftw gdbm glib2 gst-plugins-base gtk3 libice libsamplerate libsm libsndfile libtool libxtst speex"
+
+configure() {
+    meson_configure \
+        -Dudevrulesdir="${prefix}/lib/udev/rules.d" \
+        -Ddatabase=gdbm \
+        -Dtests=false
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

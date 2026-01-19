@@ -1,0 +1,47 @@
+#!/bin/bash
+
+name=gst-plugins-base
+version=1.26.10
+tarball_url="https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-${version}.tar.xz"
+tarball_blake2b="d9eba59329ee782c758ea67a5d80522e68f5ee34bd667fe9fdbb3668e1de03dad06c3de684e2f4af5107c8ba512f622d2f8a8550a994aa141aa8561de1ccfeed"
+revision=1
+imagedeps="build-essential libwayland-bin patchelf"
+hostdeps="gcc pkgconf gobject-introspection"
+deps="
+    core-libs
+    alsa-lib
+    gdk-pixbuf
+    glib2
+    graphene
+    gstreamer
+    iso-codes
+    libgudev
+    libjpeg-turbo
+    libogg
+    libpng
+    libsamplerate
+    libtheora
+    libvorbis
+    libxi
+    libxv
+    mesa
+    opus
+    pango
+    sdl2-compat
+"
+
+configure() {
+    meson_configure \
+        -Dpackage-name="GStreamer ${version}" \
+        -Dintrospection=enabled
+}
+
+build() {
+    goi_env meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+name=libtool
+from_source=libtool
+revision=1
+imagedeps="build-essential help2man"
+hostdeps="autoconf automake"
+
+configure() {
+        CFLAGS="${HOST_CFLAGS}" \
+        CXXFLAGS="${HOST_CXXFLAGS}" \
+        LDFLAGS="${HOST_LDFLAGS}" \
+    "${source_dir}"/configure \
+        --prefix="${prefix}"
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

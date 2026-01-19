@@ -1,0 +1,28 @@
+diff --git libcddb-clean/include/cddb/cddb_ni.h libcddb-workdir/include/cddb/cddb_ni.h
+index d32fdc1..4156bdb 100644
+--- libcddb-clean/include/cddb/cddb_ni.h
++++ libcddb-workdir/include/cddb/cddb_ni.h
+@@ -78,8 +78,8 @@
+ 
+ #define DEFAULT_USER        "anonymous"
+ #define DEFAULT_HOST        "localhost"
+-#define DEFAULT_SERVER      "freedb.org"
+-#define DEFAULT_PORT        888
++#define DEFAULT_SERVER      "gnudb.gnudb.org"
++#define DEFAULT_PORT        8880
+ #define DEFAULT_TIMEOUT     10
+ #define DEFAULT_PATH_QUERY  "/~cddb/cddb.cgi"
+ #define DEFAULT_PATH_SUBMIT "/~cddb/submit.cgi"
+diff --git libcddb-clean/lib/cddb_net.c libcddb-workdir/lib/cddb_net.c
+index 7adf37b..231afeb 100644
+--- libcddb-clean/lib/cddb_net.c
++++ libcddb-workdir/lib/cddb_net.c
+@@ -325,7 +325,7 @@ int timeout_connect(int sockfd, const struct sockaddr *addr,
+             default:
+                 /* we got connected, check error condition */
+                 l = sizeof(rv);
+-                getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &rv, &l);
++                getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &rv, (socklen_t * restrict)&l);
+                 if (rv) {
+                     /* something went wrong, simulate normal connect behaviour */
+                     errno = rv;

@@ -1,0 +1,29 @@
+#!/bin/bash
+
+name=v4l-utils
+version=1.32.0
+tarball_url="https://linuxtv.org/downloads/v4l-utils/v4l-utils-${version}.tar.xz"
+tarball_blake2b="6656c564f7d1a432ebad7f4b35b0b9c351eed0b07f927652076a261356afe1c57ea094d5bffd24c5b9826025bd8da4772159ab4e10a11e059fdb07749cfc6247"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs alsa-lib glu libjpeg-turbo llvm json-c sdl2-compat udev"
+
+configure() {
+    meson_configure \
+        -Dudevdir="${prefix}/lib/udev/rules.d" \
+        -Dgconv=disabled
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    # Move v4l2-dbg from ${prefix}/sbin to ${prefix}/bin
+    mv "${dest_dir}${prefix}/sbin/v4l2-dbg" "${dest_dir}${prefix}/bin/"
+    rmdir "${dest_dir}${prefix}/sbin"
+
+    post_package_strip
+}

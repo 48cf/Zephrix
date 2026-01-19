@@ -1,0 +1,23 @@
+#! /bin/sh
+
+name=libusb
+version=1.0.29
+revision=1
+tarball_url="https://github.com/libusb/libusb/releases/download/v${version}/libusb-${version}.tar.bz2"
+tarball_blake2b="74db11918fa704eae3a320838c84dd06427acd5e3f73263e965decd1a09f0a14ed2d1a3916bf7eada26ab1164a3955a9fa3bdff8e3294264c6f8e1137866652a"
+hostdeps="gcc pkgconf"
+deps="core-libs udev"
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

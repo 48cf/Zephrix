@@ -1,0 +1,27 @@
+#!/bin/bash
+
+name=libkeybinder3
+version=0.3.2
+tarball_url="https://github.com/kupferlauncher/keybinder/releases/download/keybinder-3.0-v${version}/keybinder-3.0-${version}.tar.gz"
+tarball_blake2b="f998430a14e881b5b1802747ec15967d60bedf8e076e5ace886a665ad168eb297679f30289b6cae835f4b291a0744c12331e420dcafbfca7e63cc5e807e9cd46"
+revision=1
+imagedeps="pkg-config"
+hostdeps="gcc pkgconf"
+deps="core-libs gtk3"
+
+# TODO: Figure out gobject-introspection issues
+
+configure() {
+    autotools_configure \
+        --disable-introspection
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

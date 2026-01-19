@@ -1,0 +1,24 @@
+#!/bin/bash
+
+name=vulkan-icd-loader
+version=1.4.309
+tarball_url="https://github.com/KhronosGroup/Vulkan-Loader/archive/refs/tags/v${version}/Vulkan-Loader-${version}.tar.gz"
+tarball_blake2b="59f7cfc0e33342c8584567d1863a967d411d722518edbfc179d636f6689b8bfc52bfd08db780e3f4976b24642554248e0a12e2eb94f8ccfe887f18290fb9760d"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs libx11 libxcb libxrandr vulkan-headers wayland"
+
+configure() {
+    cmake_configure \
+        -DCMAKE_SKIP_RPATH=TRUE
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}
