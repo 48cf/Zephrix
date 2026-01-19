@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=libutf8proc
+version=2.11.3
+tarball_url="https://github.com/JuliaStrings/utf8proc/releases/download/v${version}/utf8proc-${version}.tar.gz"
+tarball_blake2b="1916b0308e3d2554777a08cc71f75650d22d1f6f6df5ab72304e8d1634c354d802c157b6c211dc535baba61f2deb05b36b08158ac392f48061cb5dd3b6aebd80"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    cmake_configure
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}
