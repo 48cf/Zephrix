@@ -1,0 +1,26 @@
+#!/bin/bash
+
+name=tumbler
+version=4.21.1
+tarball_url="https://archive.xfce.org/src/xfce/tumbler/${version%.*}/tumbler-${version}.tar.xz"
+tarball_blake2b="a2090f5dfcdb278b5171ec766d06b81d87bab6242b9850354b0ea6a91e40e34b62089be3271f1001ead50a9e5449332cc5fec0daadc6613b392d4e946d10cec7"
+revision=1
+imagedeps="libglib2.0-dev-bin"
+hostdeps="gcc pkgconf"
+deps="core-libs ffmpegthumbnailer freetype2 gdk-pixbuf glib2 gstreamer hicolor-icon-theme libxfce4util"
+
+configure() {
+    meson_configure
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    rm -r "${dest_dir}${prefix}/lib/systemd"
+
+    post_package_strip
+}
