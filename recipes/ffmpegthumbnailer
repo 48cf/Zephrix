@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=ffmpegthumbnailer
+version=2.3.0
+git_url="https://github.com/dirkvdb/ffmpegthumbnailer.git"
+commit="cfaf0c5018aec14e5ecbb687d40b090c2a6a14bd"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs ffmpeg libjpeg-turbo libpng"
+
+configure() {
+    cmake_configure
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}
