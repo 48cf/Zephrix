@@ -1,12 +1,10 @@
 #!/bin/bash
 
-name=freetype2
-version=2.14.1
-git_url="https://gitlab.freedesktop.org/freetype/freetype.git"
-commit=526ec5c47b9ebccc4754c85ac0c0cdf7c85a5e9b
-revision=2
+name=freetype2-bootstrap
+from_source=freetype2
+revision=1
+bootstrap_pkg=yes
 hostdeps="gcc pkgconf"
-builddeps="harfbuzz"
 deps="core-libs brotli bzip2 libpng zlib"
 
 configure() {

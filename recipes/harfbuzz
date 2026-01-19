@@ -4,10 +4,10 @@ name=harfbuzz
 version=12.3.0
 tarball_url="https://github.com/harfbuzz/harfbuzz/releases/download/${version}/harfbuzz-${version}.tar.xz"
 tarball_blake2b="65e0b6076cae1e324fd87e4a08c53c1649df2afd8f290f5b6a5553a2a91ae932b197c103484fcd576fa0ad5baef57ff78a12c865c00eb1126709fc9aaef21210"
-revision=1
+revision=2
 imagedeps="build-essential patchelf"
 hostdeps="gcc pkgconf gobject-introspection"
-deps="core-libs cairo freetype2 glib2 graphite2 icu zlib"
+deps="core-libs cairo freetype2-bootstrap glib2 graphite2 icu zlib"
 
 configure() {
     meson_configure \
