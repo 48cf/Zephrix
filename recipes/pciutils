@@ -4,7 +4,7 @@ name=pciutils
 version=3.14.0
 tarball_url="https://mj.ucw.cz/download/linux/pci/pciutils-3.14.0.tar.gz"
 tarball_blake2b="3ab270c4523cc1968d5f3a03d2564eff5560b60eb8307bafe44ee240a6636dc676fbf0a28effe3c9abc99bfc86a975aea066d634a5e5adaffb2c63ba226511d9"
-revision=2
+revision=3
 hostdeps="gcc pkgconf"
 deps="core-libs hwdata"
 
@@ -35,6 +35,9 @@ package() {
         DNS=no \
 
     rm -rf "${dest_dir}${prefix}/share/hwdata"
+
+    rm "${dest_dir}${prefix}/bin/update-pciids"
+    rm "${dest_dir}${prefix}/share/man/man8/update-pciids.8"
 
     post_package_strip
 }
