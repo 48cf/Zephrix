@@ -1,0 +1,33 @@
+#!/bin/bash
+
+name=libgpg-error
+version=1.58
+tarball_url="https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-${version}.tar.bz2"
+tarball_blake2b="7d1c0d54094d870e9e92aebadc4a8a3cf0e7a1ae7841b445896105583a8885439ca8364b2e364639759912ea46f801b41e5025db9aa292c4fce43713430711e1"
+revision=1
+imagedeps="build-essential"
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+prepare() {
+    cp -v src/syscfg/lock-obj-pub.${JINX_ARCH}-unknown-linux-gnu.h src/syscfg/lock-obj-pub.ironclad-gnu.h
+}
+
+configure() {
+    autotools_configure \
+        --enable-threads \
+        --enable-install-gpg-error-config
+}
+
+build() {
+    make -j${parallelism} \
+        CFLAGS_FOR_BUILD="${HOST_CFLAGS}" \
+        CXXFLAGS_FOR_BUILD="${HOST_CXXFLAGS}" \
+        LDFLAGS_FOR_BUILD="${HOST_LDFLAGS}"
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}
