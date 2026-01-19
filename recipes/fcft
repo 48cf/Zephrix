@@ -1,0 +1,26 @@
+#!/bin/bash
+
+name=fcft
+version=3.3.3
+tarball_url="https://codeberg.org/dnkl/fcft/releases/download/${version}/fcft-${version}.tar.gz"
+tarball_blake2b="bd219a0a35745b7ae55ef255a49a572f14c77e1209e561184821a79db2d29bde0879d9a26d9711d30ad479a7b2a5e2937b4a089e897268075bfa28a2e2b17e1d"
+revision=1
+hostdeps="gcc pkgconf"
+builddeps="tllist"
+deps="core-libs freetype2 harfbuzz libutf8proc pixman"
+
+configure() {
+    meson_configure \
+        -Dgrapheme-shaping=enabled \
+        -Drun-shaping=enabled
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}
