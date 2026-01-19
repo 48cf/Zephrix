@@ -1,0 +1,29 @@
+#!/bin/bash
+
+name=openh264
+version=2.6.0
+git_url="https://github.com/cisco/openh264.git"
+commit="652bdb7719f30b52b08e506645a7322ff1b2cc6f"
+revision=1
+imagedeps="nasm"
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+build() {
+    cp -rp "${source_dir}"/. ./
+
+    make -j${parallelism} \
+        CC="${OS_TRIPLET}-gcc" \
+        CXX="${OS_TRIPLET}-g++" \
+        AR="${OS_TRIPLET}-ar" \
+        CFLAGS="${TARGET_CFLAGS} -fPIC" \
+        CXXFLAGS="${TARGET_CXXFLAGS} -fPIC" \
+        LDFLAGS="${TARGET_LDFLAGS}"
+}
+
+package() {
+    make DESTDIR="${dest_dir}" PREFIX="${prefix}" install-shared
+    install -Dm755 h264{dec,enc} -t "${dest_dir}${prefix}/bin"
+
+    post_package_strip
+}
