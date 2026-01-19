@@ -1,0 +1,22 @@
+#!/bin/bash
+
+name=xfwm4-themes
+version=4.10.0
+tarball_url="https://archive.xfce.org/src/art/xfwm4-themes/${version%.*}/xfwm4-themes-${version}.tar.bz2"
+tarball_blake2b="42cc46f8b3ac4584f33273373a54f3b31a5ae7c3dd3ae0bee97b2d6e721fd1d6263964c90fdfb5f53fc1c8c138ff07b7c0b4000661ceea4f074a23788f74886c"
+revision=1
+hostdeps="gcc"
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}
