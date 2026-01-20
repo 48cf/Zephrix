@@ -4,7 +4,7 @@ name=seatd
 version=0.9.1
 tarball_url="https://git.sr.ht/~kennylevinsen/seatd/archive/${version}.tar.gz"
 tarball_blake2b="f935165c00bf0e35d73809d408ae1e0500a8d5be286fba2d14ee30704d0e8555f67f964bf06fb71245eed090b1d1a00abdb26406e0a617e9a592546401f653d2"
-revision=1
+revision=2
 hostdeps="gcc pkgconf"
 deps="core-libs elogind"
 
@@ -25,6 +25,34 @@ build() {
 
 package() {
     DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    mkdir -pv "${dest_dir}"/etc/conf.d
+    cp -v "${base_dir}"/build-support/seatd/seatd.confd "${dest_dir}"/etc/conf.d/seatd
+
+    mkdir -pv "${dest_dir}"/etc/init.d
+    cp -v "${base_dir}"/build-support/seatd/seatd.initd "${dest_dir}"/etc/init.d/seatd
+
+    mkdir -p "${dest_dir}"/etc/runlevels/default
+    ln -sv ../../init.d/seatd "${dest_dir}"/etc/runlevels/default/seatd
+
+    cat <<'EOF' >"${dest_dir}"/INSTALL
+#! /bin/sh
+
+export PATH="/usr/bin:/usr/local/bin:/usr/local/sbin"
+
+ACTION="$1"
+
+case "${ACTION}" in
+pre)
+    ;;
+post)
+    groupadd -g 21 seat
+    ;;
+esac
+
+exit 0
+EOF
+    chmod +x "${dest_dir}"/INSTALL
 
     post_package_strip
 }
