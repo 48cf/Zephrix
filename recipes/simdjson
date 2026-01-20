@@ -1,0 +1,23 @@
+#!/bin/bash
+
+name=simdjson
+version=4.2.4
+git_url="https://github.com/simdjson/simdjson.git"
+commit=980f2ad3afb12729157b44ed33d2bac41b67b54b
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs"
+
+configure() {
+    cmake_configure
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}
