@@ -1,0 +1,62 @@
+#!/bin/bash
+
+name=nodejs
+version=25.3.0
+git_url="https://github.com/nodejs/node.git"
+commit="00d6cd83927d6d5c8fe9d0cdd101daa6df4b1a15"
+revision=1
+imagedeps="
+    build-essential
+    libbrotli-dev
+    libc-ares-dev
+    libicu-dev
+    libnghttp2-dev
+    libnghttp3-dev
+    libngtcp2-dev
+    libsimdjson-dev
+    libssl-dev
+    libuv1-dev
+    zlib1g-dev
+"
+hostdeps="gcc pkgconf"
+deps="core-libs brotli c-ares icu nghttp2 nghttp3 ngtcp2 libuv openssl simdjson zlib"
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+
+        CC="${OS_TRIPLET}-gcc" \
+        CXX="${OS_TRIPLET}-g++" \
+        AR="${OS_TRIPLET}-ar" \
+        CC_host="gcc" \
+        CXX_host="g++" \
+        AR_host="ar" \
+        PKG_CONFIG="${OS_TRIPLET}-pkg-config" \
+        CFLAGS="${TARGET_CFLAGS}" \
+        CXXFLAGS="${TARGET_CXXFLAGS}" \
+        CFLAGS_host="${HOST_CFLAGS}" \
+        CXXFLAGS_host="${HOST_CXXFLAGS}" \
+    ./configure \
+        --prefix="${prefix}" \
+        --cross-compiling \
+        --without-npm \
+        --with-intl=system-icu \
+        --shared-brotli \
+        --shared-cares \
+        --shared-nghttp2 \
+        --shared-nghttp3 \
+        --shared-ngtcp2 \
+        --shared-libuv \
+        --shared-openssl \
+        --shared-simdjson \
+        --shared-zlib
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}

@@ -1,0 +1,49 @@
+#!/bin/bash
+
+name=nodejs
+from_source=nodejs
+revision=1
+imagedeps="
+    build-essential
+    libbrotli-dev
+    libc-ares-dev
+    libicu-dev
+    libnghttp2-dev
+    libnghttp3-dev
+    libngtcp2-dev
+    libsimdjson-dev
+    libssl-dev
+    libuv1-dev
+    pkg-config
+    zlib1g-dev
+"
+
+configure() {
+    cp -rp "${source_dir}"/. ./
+
+        CFLAGS="${HOST_CFLAGS}" \
+        CXXFLAGS="${HOST_CXXFLAGS}" \
+    ./configure \
+        --prefix="${prefix}" \
+        --without-npm \
+        --with-intl=system-icu \
+        --shared-brotli \
+        --shared-cares \
+        --shared-nghttp2 \
+        --shared-nghttp3 \
+        --shared-ngtcp2 \
+        --shared-libuv \
+        --shared-openssl \
+        --shared-simdjson \
+        --shared-zlib
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    make DESTDIR="${dest_dir}" install
+
+    post_package_strip
+}
