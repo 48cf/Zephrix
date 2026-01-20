@@ -4,7 +4,7 @@ name=wlroots0.19
 version=0.19.2
 tarball_url="https://gitlab.freedesktop.org/wlroots/wlroots/-/releases/${version}/downloads/wlroots-${version}.tar.gz"
 tarball_blake2b="b1feba85ea31a1ded7ab13429aeac7d7f8aa44ee831b0031b9befa9354e9c3eadc82d7ecb7f2362c2a1d6bcaf92c14844491e5cc3256bbb06835b2861370c7dd"
-revision=1
+revision=2
 imagedeps="glslang-tools hwdata libwayland-bin pkg-config"
 hostdeps="gcc pkgconf"
 deps="
@@ -29,6 +29,10 @@ configure() {
     meson_configure \
         -Dbackends=drm,libinput \
         -Dexamples=false
+
+    # HACK: pkgconf prepends paths with sysroot dir, so we need to fix them
+    # in the generated config file to allow Xwayland to properly start
+    sed -i "s|/sysroot||g" include/config.h
 }
 
 build() {

@@ -4,7 +4,7 @@ name=xorg-xwayland
 version=24.1.9
 tarball_url="https://www.x.org/pub/individual/xserver/xwayland-${version}.tar.xz"
 tarball_blake2b="f445efb5f09d6516f01f0a3f2b68d363ea3f5b82b199d9cef6b5d442885d1d34489d60f2bb8cd8ac3dc7077b5b9d4532ebf3c18d7313a584e9a35f5f5c416273"
-revision=1
+revision=2
 imagedeps="pkg-config libwayland-bin"
 hostdeps="gcc pkgconf"
 deps="
@@ -31,6 +31,11 @@ configure() {
         -Dxvfb=false \
         -Dxkb_dir="${prefix}/share/X11/xkb" \
         -Dxkb_output_dir=/var/lib/xkb
+
+    # HACK: pkgconf prepends paths with sysroot dir, so we need to fix them
+    # in the generated config files
+    sed -i "s|/sysroot||g" include/dix-config.h
+    sed -i "s|/sysroot||g" include/xkb-config.h
 }
 
 build() {
