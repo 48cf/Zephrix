@@ -1,0 +1,32 @@
+#!/bin/bash
+
+name=qt6-svg
+version=6.10.1
+git_url="https://code.qt.io/qt/qtsvg.git"
+commit="4b1a183d3592f497bc3fd3a2c7130f228175b899"
+revision=1
+imagedeps="pkg-config qt6-base-private-dev"
+hostdeps="gcc pkgconf"
+deps="core-libs qt6-base"
+
+configure() {
+    # Qt6 handles _FORTIFY_SOURCE internally.
+    # Remove any -D_FORTIFY_SOURCE from TARGET_C{,XX}FLAGS to avoid conflicts.
+    TARGET_CFLAGS="${TARGET_CFLAGS//-Wp,-D_FORTIFY_SOURCE=?/}"
+    TARGET_CXXFLAGS="${TARGET_CXXFLAGS//-Wp,-D_FORTIFY_SOURCE=?/}"
+
+        PKG_CONFIG="${OS_TRIPLET}-pkg-config" \
+    cmake_configure \
+        -DQT_HOST_PATH="${build_dir}/host-pkgs/qt6" \
+        -DQT_HOST_PATH_CMAKE_DIR="${build_dir}/host-pkgs/qt6/usr/local/lib/cmake"
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}

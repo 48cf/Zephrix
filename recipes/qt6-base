@@ -1,0 +1,113 @@
+#!/bin/bash
+
+name=qt6-base
+version=6.10.1
+git_url="https://code.qt.io/qt/qtbase.git"
+commit="90b845d15ffb97693dba527385db83510ebd121a"
+revision=1
+imagedeps="pkg-config qt6-base-private-dev"
+hostdeps="gcc pkgconf"
+deps="
+    core-libs
+    at-spi2-core
+    brotli
+    dbus
+    fontconfig
+    freetype2
+    glib2
+    gtk3
+    harfbuzz
+    libdrm
+    libevdev
+    libice
+    libinput
+    libjpeg-turbo
+    libpng
+    libsm
+    libx11
+    libxcb
+    libxcursor
+    libxi
+    libxinerama
+    libxkbcommon
+    libxrender
+    mesa
+    mtdev
+    openssl
+    pcre2
+    sqlite
+    udev
+    wayland
+    wayland-protocols
+    xcb-util-cursor
+    xcb-util-image
+    xcb-util-keysyms
+    xcb-util-renderutil
+    xcb-util-wm
+    zlib
+    zstd
+"
+
+configure() {
+    # Qt6 handles _FORTIFY_SOURCE internally.
+    # Remove any -D_FORTIFY_SOURCE from TARGET_C{,XX}FLAGS to avoid conflicts.
+    TARGET_CFLAGS="${TARGET_CFLAGS//-Wp,-D_FORTIFY_SOURCE=?/}"
+    TARGET_CXXFLAGS="${TARGET_CXXFLAGS//-Wp,-D_FORTIFY_SOURCE=?/}"
+
+        PKG_CONFIG="${OS_TRIPLET}-pkg-config" \
+    cmake_configure \
+        -DQT_HOST_PATH="${build_dir}/host-pkgs/qt6" \
+        -DQT_HOST_PATH_CMAKE_DIR="${build_dir}/host-pkgs/qt6/usr/local/lib/cmake" \
+        -DINSTALL_ARCHDATADIR=lib/qt6 \
+        -DINSTALL_PLUGINSDIR=lib/qt6/plugins \
+        -DINSTALL_QMLDIR=lib/qt6/qml \
+        -DINSTALL_DATADIR=share/qt6 \
+        -DINSTALL_DOCDIR=share/qt6-doc \
+        -DINSTALL_TRANSLATIONSDIR=share/qt6/translations \
+        -DINSTALL_SYSCONFDIR=/etc/xdg \
+        -DINSTALL_MKSPECSDIR=lib/qt6/mkspecs \
+        -DINSTALL_EXAMPLESDIR=share/qt6/examples \
+        -DQT_BUILD_EXAMPLES=ON \
+        -DQT_BUILD_TESTS=OFF \
+        -DFEATURE_concurrent=ON \
+        -DFEATURE_dbus=ON \
+        -DFEATURE_gui=ON \
+        -DFEATURE_network=ON \
+        -DFEATURE_printsupport=ON \
+        -DFEATURE_sql=ON \
+        -DFEATURE_testlib=ON \
+        -DFEATURE_widgets=ON \
+        -DFEATURE_libudev=ON \
+        -DFEATURE_icu=ON \
+        -DFEATURE_glib=ON \
+        -DFEATURE_pcre2=ON \
+        -DFEATURE_xml=ON \
+        -DFEATURE_harfbuzz=ON \
+        -DFEATURE_xkbcommon=ON \
+        -DFEATURE_xkbcommon_x11=ON \
+        -DFEATURE_libinput=ON \
+        -DFEATURE_evdev=ON \
+        -DFEATURE_mtdev=ON \
+        -DFEATURE_egl=ON \
+        -DFEATURE_opengl=ON \
+        -DFEATURE_accessibility=ON \
+        -DFEATURE_xlib=ON \
+        -DFEATURE_xcb=ON \
+        -DFEATURE_xcb_xlib=ON \
+        -DFEATURE_eglfs_gbm=ON \
+        -DFEATURE_eglfs_egldevice=ON \
+        -DFEATURE_gtk3=ON \
+        -DFEATURE_system_sqlite=ON \
+        -DFEATURE_cups=OFF \
+        -DFEATURE_ssl=ON
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}

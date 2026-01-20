@@ -1,0 +1,33 @@
+#!/bin/bash
+
+name=qt6
+from_source=qt6
+revision=1
+imagedeps="
+    build-essential
+    pkg-config
+    libgl1-mesa-dev
+    libwayland-bin
+    libwayland-dev
+    qt6-base-dev-tools
+    qt6-base-private-dev
+"
+
+configure() {
+    cmake "${source_dir}" \
+        -G Ninja \
+        -DCMAKE_INSTALL_PREFIX="${prefix}" \
+        -DBUILD_SHARED_LIBS=ON \
+        -DQT_BUILD_EXAMPLES=OFF \
+        -DQT_BUILD_TESTS=OFF
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}

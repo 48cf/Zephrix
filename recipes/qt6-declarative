@@ -1,0 +1,32 @@
+#!/bin/bash
+
+name=qt6-declarative
+version=6.10.1
+git_url="https://code.qt.io/qt/qtdeclarative.git"
+commit="22fb5e739a2ea700448b22d34ade0d5c1927cb48"
+revision=1
+imagedeps="pkg-config spirv-tools qt6-base-private-dev"
+hostdeps="gcc pkgconf"
+deps="core-libs qt6-base qt6-shadertools qt6-svg qt6-imageformats qt6-languageserver"
+
+configure() {
+    # Qt6 handles _FORTIFY_SOURCE internally.
+    # Remove any -D_FORTIFY_SOURCE from TARGET_C{,XX}FLAGS to avoid conflicts.
+    TARGET_CFLAGS="${TARGET_CFLAGS//-Wp,-D_FORTIFY_SOURCE=?/}"
+    TARGET_CXXFLAGS="${TARGET_CXXFLAGS//-Wp,-D_FORTIFY_SOURCE=?/}"
+
+        PKG_CONFIG="${OS_TRIPLET}-pkg-config" \
+    cmake_configure \
+        -DQT_HOST_PATH="${build_dir}/host-pkgs/qt6" \
+        -DQT_HOST_PATH_CMAKE_DIR="${build_dir}/host-pkgs/qt6/usr/local/lib/cmake"
+}
+
+build() {
+    cmake --build . -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" cmake --install .
+
+    post_package_strip
+}

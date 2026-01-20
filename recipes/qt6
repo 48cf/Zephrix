@@ -1,0 +1,25 @@
+#!/bin/bash
+
+name=qt6
+version=6.10.1
+git_url="https://code.qt.io/qt/qt5.git"
+commit="56657e036f579ae0b858ae8c9659a0f7b7a53407"
+revision=1
+deps="
+    qt6-5compat
+    qt6-base
+    qt6-declarative
+    qt6-imageformats
+    qt6-languageserver
+    qt6-multimedia
+    qt6-sensors
+    qt6-shadertools
+    qt6-speech
+    qt6-svg
+    qt6-wayland
+"
+
+early_prepare() {
+    ./init-repository -f --module-subset \
+        qt5compat,qtbase,qtcharts,qtdeclarative,qtimageformats,qtlanguageserver,qtmultimedia,qtpositioning,qtsensors,qtshadertools,qtspeech,qtsvg,qttools,qtwayland
+}
