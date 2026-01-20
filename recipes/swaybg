@@ -1,0 +1,24 @@
+#!/bin/bash
+
+name=swaybg
+version=1.2.1
+tarball_url="https://github.com/swaywm/swaybg/releases/download/v${version}/swaybg-${version}.tar.gz"
+tarball_blake2b="0183f11c2d8a967054572676a1c87c7d533c8f4a7bd204049d53e350966dfc825d2d779d0d8165cec9b8e019b9c1bc7a0b7702270b02aa0f02bfbc8400ec6b53"
+revision=1
+imagedeps="libwayland-bin pkg-config"
+hostdeps="gcc pkgconf"
+deps="core-libs cairo gdk-pixbuf harfbuzz wayland wayland-protocols"
+
+configure() {
+    meson_configure
+}
+
+build() {
+    meson compile -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" meson install --no-rebuild
+
+    post_package_strip
+}
