@@ -1,0 +1,28 @@
+#!/bin/bash
+
+name=libuv
+version=1.51.0
+git_url="https://github.com/libuv/libuv.git"
+commit="5152db2cbfeb5582e9c27c5ea1dba2cd9e10759b"
+revision=1
+source_hostdeps="autoconf automake libtool pkgconf"
+hostdeps="gcc pkgconf"
+deps="core-libs libnsl"
+
+prepare() {
+    ./autogen.sh
+}
+
+configure() {
+    autotools_configure
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}
