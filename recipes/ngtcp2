@@ -1,0 +1,26 @@
+#!/bin/bash
+
+name=ngtcp2
+version=1.19.0
+tarball_url="https://github.com/ngtcp2/ngtcp2/releases/download/v${version}/ngtcp2-${version}.tar.xz"
+tarball_blake2b="4db7b7a55d4138612a40a4a0288b5ab229e77d30614918e9c7dbbc3f3d50b85eaa5f26a9683b6834b61e28ed775ec1431486fb1e75e30a6d5f240d72e35e5714"
+revision=1
+hostdeps="gcc pkgconf"
+deps="core-libs brotli gnutls openssl"
+
+configure() {
+    autotools_configure \
+        --with-libbrotlienc \
+        --with-libbrotlidec \
+        --with-gnutls
+}
+
+build() {
+    make -j${parallelism}
+}
+
+package() {
+    DESTDIR="${dest_dir}" make install
+
+    post_package_strip
+}
